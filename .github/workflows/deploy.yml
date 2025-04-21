@@ -24,3 +24,4 @@ jobs:
           local-dir: ./  # Or your desired path
           exclude: |
             database.sql
+            .env

@@ -1,9 +1,14 @@
 <?php
 // config/database.php
-$host = 'localhost';
-$dbname = 'food_ordering_system';
-$username = 'admin';
-$password = 'admin';
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
+$host = $_ENV['DB_HOST'];
+$dbname = $_ENV['DB_NAME'];
+$username = $_ENV['DB_USERNAME'];
+$password = $_ENV['DB_PASSWORD'];
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);

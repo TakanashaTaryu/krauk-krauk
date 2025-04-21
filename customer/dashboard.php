@@ -3,7 +3,7 @@ require_once '../includes/header.php';
 
 // Check if user is logged in and is a customer
 if (!isset($_SESSION['user_id']) || isAdmin()) {
-    redirect('/kwu/auth/login.php');
+    redirect('../auth/login.php');
 }
 
 // Get customer's recent orders

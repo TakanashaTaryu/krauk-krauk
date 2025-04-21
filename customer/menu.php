@@ -5,13 +5,13 @@ require_once '../includes/header.php';
 // Cek login
 if (!isLoggedIn()) {
     setAlert('error', 'Silakan login terlebih dahulu');
-    redirect('/kwu/auth/login.php');
+    redirect('../auth/login.php');
 }
 
 // Cek jika user adalah admin
 if (isAdmin()) {
     setAlert('error', 'Anda tidak memiliki akses');
-    redirect('/kwu/admin/dashboard.php');
+    redirect('../admin/dashboard.php');
 }
 
 // Proses tambah ke keranjang
@@ -47,14 +47,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
                     $stmt = $pdo->prepare("UPDATE keranjang SET jumlah = ? WHERE id = ?");
                     $stmt->execute([$new_quantity, $cart_item['id']]);
                     setAlert('success', 'Menu berhasil ditambahkan ke keranjang');
-                    redirect('/kwu/customer/menu.php');
+                    redirect('../customer/menu.php');
                 }
             } else {
                 // Tambah baru
                 $stmt = $pdo->prepare("INSERT INTO keranjang (id_customer, id_menu, jumlah) VALUES (?, ?, ?)");
                 $stmt->execute([$_SESSION['user_id'], $menu_id, $quantity]);
                 setAlert('success', 'Menu berhasil ditambahkan ke keranjang');
-                redirect('/kwu/customer/menu.php');
+                redirect('../customer/menu.php');
             }
         }
     }
@@ -71,7 +71,7 @@ $menu_items = $stmt->fetchAll();
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <?php foreach ($menu_items as $item): ?>
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <img src="/kwu/assets/images/menu/<?= htmlspecialchars($item['gambar']) ?>" alt="<?= htmlspecialchars($item['nama']) ?>" class="w-full h-48 object-cover">
+            <img src="../assets/images/menu/<?= htmlspecialchars($item['gambar']) ?>" alt="<?= htmlspecialchars($item['nama']) ?>" class="w-full h-48 object-cover">
             <div class="p-4">
                 <h3 class="text-xl font-semibold mb-2"><?= htmlspecialchars($item['nama']) ?></h3>
                 <p class="text-gray-600 mb-2"><?= htmlspecialchars($item['deskripsi']) ?></p>

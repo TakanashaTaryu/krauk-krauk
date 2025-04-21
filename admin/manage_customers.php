@@ -3,7 +3,7 @@ require_once '../includes/header.php';
 
 // Check if user is admin
 if (!isset($_SESSION['user_id']) || !isAdmin()) {
-    redirect('/kwu/auth/login.php');
+    redirect('../auth/login.php');
 }
 
 // Handle customer deletion

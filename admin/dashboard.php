@@ -2,7 +2,7 @@
 require_once '../includes/header.php';
 
 if (!isset($_SESSION['user_id']) || !isAdmin()) {
-    redirect('/kwu/auth/login.php');
+    redirect('../auth/login.php');
 }
 
 // Get summary data

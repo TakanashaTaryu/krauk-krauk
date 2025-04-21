@@ -3,7 +3,7 @@ require_once '../includes/header.php';
 
 // Check if user is admin
 if (!isset($_SESSION['user_id']) || !isAdmin()) {
-    redirect('/kwu/auth/login.php');
+    redirect('../auth/login.php');
 }
 
 // Handle form submissions
@@ -107,7 +107,7 @@ $menu_items = $stmt->fetchAll();
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php foreach ($menu_items as $item): ?>
         <div class="bg-white rounded-lg shadow overflow-hidden">
-            <img src="/kwu/assets/images/menu/<?= htmlspecialchars($item['gambar']) ?>" 
+            <img src="../assets/images/menu/<?= htmlspecialchars($item['gambar']) ?>" 
                  alt="<?= htmlspecialchars($item['nama']) ?>"
                  class="w-full h-48 object-cover">
             

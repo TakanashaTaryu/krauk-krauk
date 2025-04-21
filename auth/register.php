@@ -4,9 +4,9 @@ require_once '../includes/header.php';
 // Redirect if already logged in
 if (isLoggedIn()) {
     if (isAdmin()) {
-        redirect('/kwu/admin/dashboard.php');
+        redirect('../admin/dashboard.php');
     } else {
-        redirect('/kwu/customer/menu.php');
+        redirect('../customer/menu.php');
     }
 }
 
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("INSERT INTO akun (email, password, no_telp, admin_value) VALUES (?, ?, ?, 0)");
             if ($stmt->execute([$email, $hashed_password, $no_telp])) {
                 setAlert('success', 'Register berhasil. Silakan login');
-                redirect('/kwu/auth/login.php');
+                redirect('../auth/login.php');
             } else {
                 setAlert('error', 'Terjadi kesalahan. Silakan coba lagi');
             }
@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
         
         <div class="mt-6 text-center">
-            <p>Sudah punya akun? <a href="/kwu/auth/login.php" class="text-orange-600 hover:underline">Login</a></p>
+            <p>Sudah punya akun? <a href="../auth/login.php" class="text-orange-600 hover:underline">Login</a></p>
         </div>
     </div>
 </div>

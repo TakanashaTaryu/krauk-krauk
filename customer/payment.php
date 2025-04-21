@@ -3,18 +3,18 @@ require_once '../includes/header.php';
 
 if (!isLoggedIn()) {
     setAlert('error', 'Please login first');
-    redirect('/kwu/auth/login.php');
+    redirect('../auth/login.php');
 }
 
 if (isAdmin()) {
     setAlert('error', 'Access denied');
-    redirect('/kwu/admin/dashboard.php');
+    redirect('../admin/dashboard.php');
 }
 
 // Check if this is a direct access or coming from cart
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['preview_order'])) {
     setAlert('error', 'Please review your cart first');
-    redirect('/kwu/customer/cart.php');
+    redirect('../customer/cart.php');
 }
 
 // Get customer information
@@ -33,7 +33,7 @@ $cart_items = $stmt->fetchAll();
 
 if (empty($cart_items)) {
     setAlert('error', 'Your cart is empty');
-    redirect('/kwu/customer/cart.php');
+    redirect('../customer/cart.php');
 }
 
 // Calculate total
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
         $pdo->commit();
         
         setAlert('success', 'Order placed successfully!');
-        redirect('/kwu/customer/orders.php');
+        redirect('../customer/orders.php');
 
     } catch (Exception $e) {
         $pdo->rollBack();

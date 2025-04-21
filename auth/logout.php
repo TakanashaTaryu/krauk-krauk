@@ -8,5 +8,5 @@ session_unset();
 session_destroy();
 
 // Redirect ke halaman login
-redirect('/kwu/auth/login.php');
+redirect('../auth/login.php');
 ?>

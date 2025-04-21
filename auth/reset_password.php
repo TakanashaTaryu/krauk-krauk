@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && $_POST['st
         if ($stmt->execute([$hashed_password, $email])) {
             unset($_SESSION['reset_email']); // Hapus session reset_email
             setAlert('success', 'Password berhasil diubah. Silakan login');
-            redirect('/kwu/auth/login.php');
+            redirect('../auth/login.php');
         } else {
             setAlert('error', 'Terjadi kesalahan. Silakan coba lagi');
         }
@@ -137,7 +137,7 @@ if (isset($_SESSION['reset_email']) && $step == 1) {
         <?php endif; ?>
         
         <div class="mt-6 text-center">
-            <p><a href="/kwu/auth/login.php" class="text-orange-600 hover:underline">Kembali ke halaman login</a></p>
+            <p><a href="../auth/login.php" class="text-orange-600 hover:underline">Kembali ke halaman login</a></p>
         </div>
     </div>
 </div>

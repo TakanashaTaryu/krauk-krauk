@@ -126,7 +126,7 @@ if (isset($_SESSION['alert'])) {
 <body class="flex flex-col bg-gray-100 min-h-screen">
     <nav class="bg-white shadow-md">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="/kwu/index.php" class="text-2xl font-bold text-orange-600">Krauk-Krauk</a>
+            <a href="../index.php" class="text-2xl font-bold text-orange-600">Krauk-Krauk</a>
             
             <!-- Desktop Menu -->
             <div class="space-x-4 desktop-menu">
@@ -140,13 +140,13 @@ if (isset($_SESSION['alert'])) {
                     
                     if ($_SESSION['admin_value'] == 1): 
                     ?>
-                        <a href="/kwu/admin/dashboard.php" class="text-gray-700 hover:text-orange-600">Dashboard</a>
-                        <a href="/kwu/admin/manage_menu.php" class="text-gray-700 hover:text-orange-600">Menu</a>
-                        <a href="/kwu/admin/manage_customers.php" class="text-gray-700 hover:text-orange-600">Customers</a>
-                        <a href="/kwu/admin/manage_orders.php" class="text-gray-700 hover:text-orange-600">Pesanan</a>
+                        <a href="../admin/dashboard.php" class="text-gray-700 hover:text-orange-600">Dashboard</a>
+                        <a href="../admin/manage_menu.php" class="text-gray-700 hover:text-orange-600">Menu</a>
+                        <a href="../admin/manage_customers.php" class="text-gray-700 hover:text-orange-600">Customers</a>
+                        <a href="../admin/manage_orders.php" class="text-gray-700 hover:text-orange-600">Pesanan</a>
                     <?php else: ?>
-                        <a href="/kwu/customer/menu.php" class="text-gray-700 hover:text-orange-600">Menu</a>
-                        <a href="/kwu/customer/cart.php" class="text-gray-700 hover:text-orange-600">
+                        <a href="../customer/menu.php" class="text-gray-700 hover:text-orange-600">Menu</a>
+                        <a href="../customer/cart.php" class="text-gray-700 hover:text-orange-600">
                             <i class="fas fa-shopping-cart"></i>
                             <?php
                             if (isset($_SESSION['user_id'])) {
@@ -159,7 +159,7 @@ if (isset($_SESSION['alert'])) {
                             }
                             ?>
                         </a>
-                        <a href="/kwu/customer/orders.php" class="text-gray-700 hover:text-orange-600">Pesanan</a>
+                        <a href="../customer/orders.php" class="text-gray-700 hover:text-orange-600">Pesanan</a>
                     <?php endif; ?>
                     <div class="inline-block relative group">
                         <button class="text-gray-700 hover:text-orange-600">
@@ -167,14 +167,14 @@ if (isset($_SESSION['alert'])) {
                         </button>
                         <div class="absolute right-0 hidden group-hover:block bg-white shadow-lg rounded-md mt-1 py-2 w-48 z-10">
                             <?php if (!isset($_SESSION['admin_value']) || $_SESSION['admin_value'] != 1): ?>
-                                <a href="/kwu/customer/profile.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profil</a>
+                                <a href="../customer/profile.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profil</a>
                             <?php endif; ?>
-                            <a href="/kwu/auth/logout.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
+                            <a href="../auth/logout.php" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
                         </div>
                     </div>
                 <?php else: ?>
-                    <a href="/kwu/auth/login.php" class="text-gray-700 hover:text-orange-600">Login</a>
-                    <a href="/kwu/auth/register.php" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">Register</a>
+                    <a href="../auth/login.php" class="text-gray-700 hover:text-orange-600">Login</a>
+                    <a href="../auth/register.php" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">Register</a>
                 <?php endif; ?>
             </div>
             
@@ -195,13 +195,13 @@ if (isset($_SESSION['alert'])) {
         <div class="px-4 py-2">
             <?php if (isset($_SESSION['user_id'])): ?>
                 <?php if ($_SESSION['admin_value'] == 1): ?>
-                    <a href="/kwu/admin/dashboard.php" class="block py-3 border-b text-gray-700">Dashboard</a>
-                    <a href="/kwu/admin/manage_menu.php" class="block py-3 border-b text-gray-700">Menu</a>
-                    <a href="/kwu/admin/manage_customers.php" class="block py-3 border-b text-gray-700">Customers</a>
-                    <a href="/kwu/admin/manage_orders.php" class="block py-3 border-b text-gray-700">Pesanan</a>
+                    <a href="../admin/dashboard.php" class="block py-3 border-b text-gray-700">Dashboard</a>
+                    <a href="../admin/manage_menu.php" class="block py-3 border-b text-gray-700">Menu</a>
+                    <a href="../admin/manage_customers.php" class="block py-3 border-b text-gray-700">Customers</a>
+                    <a href="../admin/manage_orders.php" class="block py-3 border-b text-gray-700">Pesanan</a>
                 <?php else: ?>
-                    <a href="/kwu/customer/menu.php" class="block py-3 border-b text-gray-700">Menu</a>
-                    <a href="/kwu/customer/cart.php" class="block py-3 border-b text-gray-700">
+                    <a href="../customer/menu.php" class="block py-3 border-b text-gray-700">Menu</a>
+                    <a href="../customer/cart.php" class="block py-3 border-b text-gray-700">
                         Keranjang
                         <?php
                         if (isset($_SESSION['user_id'])) {
@@ -214,13 +214,13 @@ if (isset($_SESSION['alert'])) {
                         }
                         ?>
                     </a>
-                    <a href="/kwu/customer/orders.php" class="block py-3 border-b text-gray-700">Pesanan</a>
-                    <a href="/kwu/customer/profile.php" class="block py-3 border-b text-gray-700">Profil</a>
+                    <a href="../customer/orders.php" class="block py-3 border-b text-gray-700">Pesanan</a>
+                    <a href="../customer/profile.php" class="block py-3 border-b text-gray-700">Profil</a>
                 <?php endif; ?>
-                <a href="/kwu/auth/logout.php" class="block py-3 text-gray-700">Logout</a>
+                <a href="../auth/logout.php" class="block py-3 text-gray-700">Logout</a>
             <?php else: ?>
-                <a href="/kwu/auth/login.php" class="block py-3 border-b text-gray-700">Login</a>
-                <a href="/kwu/auth/register.php" class="block py-3 text-gray-700">Register</a>
+                <a href="../auth/login.php" class="block py-3 border-b text-gray-700">Login</a>
+                <a href="../auth/register.php" class="block py-3 text-gray-700">Register</a>
             <?php endif; ?>
         </div>
     </div>

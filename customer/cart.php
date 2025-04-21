@@ -3,12 +3,12 @@ require_once '../includes/header.php';
 
 if (!isLoggedIn()) {
     setAlert('error', 'Please login first');
-    redirect('/kwu/auth/login.php');
+    redirect('../auth/login.php');
 }
 
 if (isAdmin()) {
     setAlert('error', 'Access denied');
-    redirect('/kwu/admin/dashboard.php');
+    redirect('../admin/dashboard.php');
 }
 
 $stmt = $pdo->prepare("
@@ -49,7 +49,7 @@ foreach ($cart_items as $item) {
                         <tr class="border-b" data-cart-id="<?= $item['id'] ?>">
                             <td class="py-4 px-4">
                                 <div class="flex items-center">
-                                    <img src="/kwu/assets/images/menu/<?= htmlspecialchars($item['gambar']) ?>" 
+                                    <img src="../assets/images/menu/<?= htmlspecialchars($item['gambar']) ?>" 
                                          alt="<?= htmlspecialchars($item['nama']) ?>" 
                                          class="w-16 h-16 object-cover rounded-md mr-4">
                                     <span><?= htmlspecialchars($item['nama']) ?></span>
@@ -89,7 +89,7 @@ foreach ($cart_items as $item) {
                 <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-orange-500" data-cart-id="<?= $item['id'] ?>">
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center">
-                            <img src="/kwu/assets/images/menu/<?= htmlspecialchars($item['gambar']) ?>" 
+                            <img src="../assets/images/menu/<?= htmlspecialchars($item['gambar']) ?>" 
                                  alt="<?= htmlspecialchars($item['nama']) ?>" 
                                  class="w-16 h-16 object-cover rounded-md mr-3">
                             <div>
@@ -124,7 +124,7 @@ foreach ($cart_items as $item) {
             
             <div class="mb-4">
                 <br>
-                <a href="/kwu/customer/menu.php" class="text-orange-600 hover:underline inline-flex items-center">
+                <a href="../customer/menu.php" class="text-orange-600 hover:underline inline-flex items-center">
                     <i class="fas fa-arrow-left mr-2"></i> Continue Shopping
                 </a>
             </div>
@@ -173,7 +173,7 @@ foreach ($cart_items as $item) {
     <?php else: ?>
     <div class="bg-white rounded-lg shadow-md p-8 text-center">
         <p class="text-gray-500 mb-4">Your cart is empty</p>
-        <a href="/kwu/customer/menu.php" class="text-orange-600 hover:underline inline-flex items-center justify-center">
+        <a href="../customer/menu.php" class="text-orange-600 hover:underline inline-flex items-center justify-center">
             <i class="fas fa-arrow-left mr-2"></i> Back to Menu
         </a>
     </div>

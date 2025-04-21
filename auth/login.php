@@ -5,9 +5,9 @@ require_once '../includes/header.php';
 // Jika user sudah login, redirect ke halaman yang sesuai
 if (isLoggedIn()) {
     if (isAdmin()) {
-        redirect('/kwu/admin/dashboard.php');
+        redirect('../admin/dashboard.php');
     } else {
-        redirect('/kwu/customer/menu.php');
+        redirect('../customer/menu.php');
     }
 }
 
@@ -35,9 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Redirect ke halaman yang sesuai
             if ($user['admin_value'] == 1) {
-                redirect('/kwu/admin/dashboard.php');
+                redirect('../admin/dashboard.php');
             } else {
-                redirect('/kwu/customer/menu.php');
+                redirect('../customer/menu.php');
             }
         } else {
             setAlert('error', 'Email atau password salah');
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     required
                 >
                 <div class="mt-1 text-right">
-                    <a href="/kwu/auth/reset_password.php" class="text-sm text-orange-600 hover:underline">Lupa Password?</a>
+                    <a href="../auth/reset_password.php" class="text-sm text-orange-600 hover:underline">Lupa Password?</a>
                 </div>
             </div>
             
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
         
         <div class="mt-6 text-center">
-            <p>Belum punya akun? <a href="/kwu/auth/register.php" class="text-orange-600 hover:underline">Register</a></p>
+            <p>Belum punya akun? <a href="../auth/register.php" class="text-orange-600 hover:underline">Register</a></p>
         </div>
     </div>
 </div>

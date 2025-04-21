@@ -3,7 +3,7 @@ require_once '../includes/header.php';
 
 // Check if user is logged in and is a customer
 if (!isset($_SESSION['user_id']) || isAdmin()) {
-    redirect('/kwu/auth/login.php');
+    redirect('../auth/login.php');
 }
 
 // Get user info
@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("UPDATE akun SET no_telp = ? WHERE id = ?");
         if ($stmt->execute([$no_telp, $_SESSION['user_id']])) {
             setAlert('success', 'Profile updated successfully');
-            redirect('/kwu/customer/profile.php');
+            redirect('../customer/profile.php');
         }
     } elseif (isset($_POST['update_password'])) {
         // Update password
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("UPDATE akun SET password = ? WHERE id = ?");
             if ($stmt->execute([$hashed_password, $_SESSION['user_id']])) {
                 setAlert('success', 'Password updated successfully');
-                redirect('/kwu/customer/profile.php');
+                redirect('../customer/profile.php');
             }
         }
     }

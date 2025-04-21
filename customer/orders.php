@@ -3,7 +3,7 @@ require_once '../includes/header.php';
 
 // Check if user is logged in and is a customer
 if (!isset($_SESSION['user_id']) || isAdmin()) {
-    redirect('/kwu/auth/login.php');
+    redirect('../auth/login.php');
 }
 
 // Get specific order details if ID is provided
@@ -85,7 +85,7 @@ if (!isset($order)) {
             <div class="mb-6">
                 <h3 class="font-bold mb-2">Payment Proof</h3>
                 <?php if ($order['bukti_pembayaran']): ?>
-                    <img src="/kwu/assets/images/uploads/<?= htmlspecialchars($order['bukti_pembayaran']) ?>" 
+                    <img src="../assets/images/uploads/<?= htmlspecialchars($order['bukti_pembayaran']) ?>" 
                          alt="Payment Proof" 
                          class="max-w-sm rounded-lg shadow cursor-pointer"
                          onclick="showFullImage(this.src)"

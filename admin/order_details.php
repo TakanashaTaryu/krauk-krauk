@@ -124,7 +124,7 @@ try {
                 <h3 class="font-semibold text-lg mb-4">Payment Proof</h3>
                 <?php if ($order['bukti_pembayaran']): ?>
                     <div class="max-w-md">
-                        <img src="/kwu/assets/images/uploads/<?= htmlspecialchars($order['bukti_pembayaran']) ?>" 
+                        <img src="../assets/images/uploads/<?= htmlspecialchars($order['bukti_pembayaran']) ?>" 
                              alt="Payment Proof" 
                              class="w-full rounded-lg shadow cursor-pointer"
                              onclick="showFullImage(this.src)"

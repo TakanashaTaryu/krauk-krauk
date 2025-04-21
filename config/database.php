@@ -31,10 +31,16 @@ function isAdmin() {
     return isset($_SESSION['admin_value']) && $_SESSION['admin_value'] == 1;
 }
 
-// Fungsi redirect
+// Fungsi redirect - modified to handle headers already sent
 function redirect($url) {
-    header("Location: $url");
-    exit();
+    if (headers_sent()) {
+        echo "<script>window.location.href='$url';</script>";
+        echo "<noscript><meta http-equiv='refresh' content='0;url=$url'></noscript>";
+        exit();
+    } else {
+        header("Location: $url");
+        exit();
+    }
 }
 
 // Fungsi untuk menampilkan alert

@@ -11,6 +11,16 @@ if (isAdmin()) {
     redirect('/kwu/admin/dashboard.php');
 }
 
+// Check if this is a direct access or coming from cart
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['preview_order'])) {
+    setAlert('error', 'Please review your cart first');
+    redirect('/kwu/customer/cart.php');
+}
+
+// Get customer information
+$nama_pemesan = isset($_POST['nama_pemesan']) ? $_POST['nama_pemesan'] : '';
+$alamat_pemesan = isset($_POST['alamat_pemesan']) ? $_POST['alamat_pemesan'] : '';
+
 // Get cart items for preview
 $stmt = $pdo->prepare("
     SELECT k.*, m.nama, m.harga, m.stok 
@@ -32,6 +42,13 @@ foreach ($cart_items as $item) {
     $total += $item['harga'] * $item['jumlah'];
 }
 
+// Add taxes
+$qris_tax = 500; // Rp. 500,00
+//$web_tax = 500;  // Rp. 500,00
+$app_tax = 300;  // Rp. 300,00
+$tax_total = $qris_tax + $app_tax;
+$grand_total = $total + $tax_total;
+
 // Handle payment proof upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
     try {
@@ -52,9 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
         ");
         $stmt->execute([
             $_SESSION['user_id'],
-            $total,
-            $_POST['nama_pemesan'],
-            $_POST['alamat_pemesan'],
+            $grand_total, // Use grand total including taxes
+            $nama_pemesan,
+            $alamat_pemesan,
             $upload['filename']
         ]);
         $order_id = $pdo->lastInsertId();
@@ -115,9 +132,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
                             <p class="font-medium">Rp <?= number_format($item['harga'] * $item['jumlah'], 0, ',', '.') ?></p>
                         </div>
                         <?php endforeach; ?>
-                        <div class="border-t pt-4 flex justify-between items-center font-bold">
-                            <p>Total</p>
-                            <p>Rp <?= number_format($total, 0, ',', '.') ?></p>
+                        
+                        <div class="border-t pt-4 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <p>Subtotal</p>
+                                <p>Rp <?= number_format($total, 0, ',', '.') ?></p>
+                            </div>
+                            <div class="flex justify-between items-center text-sm text-gray-600">
+                                <p>QRIS Tax</p>
+                                <p>Rp <?= number_format($qris_tax, 0, ',', '.') ?></p>
+                            </div>
+                            <!-- <div class="flex justify-between items-center text-sm text-gray-600">
+                                <p>Web Tax</p>
+                                <p>Rp <?= number_format($web_tax, 0, ',', '.') ?></p>
+                            </div> -->
+                            <div class="flex justify-between items-center text-sm text-gray-600">
+                                <p>App Tax</p>
+                                <p>Rp <?= number_format($app_tax, 0, ',', '.') ?></p>
+                            </div>
+                            <div class="flex justify-between items-center font-bold pt-2">
+                                <p>Total</p>
+                                <p>Rp <?= number_format($grand_total, 0, ',', '.') ?></p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -125,11 +161,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
                 <!-- Delivery Information -->
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h2 class="text-xl font-semibold mb-4">Delivery Information</h2>
-                    <input type="hidden" name="nama_pemesan" value="<?= htmlspecialchars($_POST['nama_pemesan']) ?>">
-                    <input type="hidden" name="alamat_pemesan" value="<?= htmlspecialchars($_POST['alamat_pemesan']) ?>">
+                    <input type="hidden" name="nama_pemesan" value="<?= htmlspecialchars($nama_pemesan) ?>">
+                    <input type="hidden" name="alamat_pemesan" value="<?= htmlspecialchars($alamat_pemesan) ?>">
                     <div class="space-y-2">
-                        <p><span class="text-gray-600">Name:</span> <?= htmlspecialchars($_POST['nama_pemesan']) ?></p>
-                        <p><span class="text-gray-600">Address:</span> <?= nl2br(htmlspecialchars($_POST['alamat_pemesan'])) ?></p>
+                        <p><span class="text-gray-600">Name:</span> <?= htmlspecialchars($nama_pemesan) ?></p>
+                        <p><span class="text-gray-600">Address:</span> <?= nl2br(htmlspecialchars($alamat_pemesan)) ?></p>
                     </div>
                 </div>
             </div>
@@ -140,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
                 
                 <!-- QRIS Code -->
                 <div class="mb-6">
-                    <p class="font-medium mb-4">Scan QRIS code below:</p>
+                    <p class="font-medium mb-4">Scan QRIS code below to pay Rp <?= number_format($grand_total, 0, ',', '.') ?>:</p>
                     <div class="bg-gray-100 p-4 rounded-lg flex justify-center">
                         <div class="w-48 h-48 bg-gray-200 flex items-center justify-center">
                             <span class="text-gray-500">QRIS Code</span>

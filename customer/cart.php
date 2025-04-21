@@ -121,6 +121,7 @@ foreach ($cart_items as $item) {
                 </div>
                 <?php endforeach; ?>
             </div>
+            <br>
             
             <div class="mb-4">
                 <a href="../customer/menu.php" class="text-orange-600 hover:underline inline-flex items-center">

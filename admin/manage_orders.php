@@ -352,41 +352,68 @@ function deleteOrder(orderId) {
 }
 
 function showOrderDetails(orderId) {
-    const modal = document.getElementById('orderDetailsModal');
-    const modalContent = document.getElementById('orderDetailsContent');
-    
-    // Show loading state
-    modal.classList.remove('hidden');
-    modalContent.innerHTML = '<div class="flex justify-center items-center h-64"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div></div>';
-    
-    // Fetch order details
-    fetch(`get_order_details.php?id=${orderId}`)
-        .then(response => response.text())
-        .then(html => {
-            modalContent.innerHTML = html;
-        })
-        .catch(error => {
-            modalContent.innerHTML = `<div class="text-red-500 p-4">Error loading order details: ${error.message}</div>`;
-        });
+    // Redirect to the order details page
+    window.location.href = `order_details.php?id=${orderId}`;
 }
 
 function viewDetails(orderId) {
-    const modal = document.getElementById('detailsModal');
-    const detailsContainer = document.getElementById('orderDetails');
-    modal.classList.remove('hidden');
-    
-    fetch(`get_order_details.php?id=${orderId}`)
-        .then(response => response.text())
-        .then(html => {
-            detailsContainer.innerHTML = html;
-        })
-        .catch(error => {
-            detailsContainer.innerHTML = `<div class="text-red-500">Error loading order details.</div>`;
-        });
+    // Redirect to the order details page instead of showing a modal
+    window.location.href = `order_details.php?id=${orderId}`;
 }
 
+// Remove or comment out the old viewDetails function that was using AJAX
+/*
+function viewDetails(orderId) {
+    const modal = document.getElementById('detailsModal');
+    const detailsContainer = document.getElementById('orderDetails');
+    
+    modal.classList.remove('hidden');
+    detailsContainer.innerHTML = '<div class="animate-pulse"><div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div><div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div><div class="h-4 bg-gray-200 rounded w-5/6 mb-4"></div></div>';
+    
+    fetch(`get_order_details.php?id=${orderId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const order = data.data.order;
+                const items = data.data.items;
+                
+                let html = `
+                    <div class="mb-4">
+                        <h3 class="font-semibold">Customer Information</h3>
+                        <p>Email: ${order.customer.email}</p>
+                        <p>Phone: ${order.customer.phone}</p>
+                        <p>Name: ${order.customer.name}</p>
+                        <p>Address: ${order.customer.address}</p>
+                    </div>
+                    <div class="mb-4">
+                        <h3 class="font-semibold">Order Information</h3>
+                        <p>Status: ${order.status}</p>
+                        <p>Total: Rp ${new Intl.NumberFormat('id-ID').format(order.total)}</p>
+                        <p>Date: ${new Date(order.date).toLocaleString()}</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold">Items</h3>
+                        <ul class="list-disc pl-5">
+                            ${items.map(item => `<li>${item.name} (${item.quantity} x Rp ${new Intl.NumberFormat('id-ID').format(item.price)} = Rp ${new Intl.NumberFormat('id-ID').format(item.subtotal)})</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                
+                detailsContainer.innerHTML = html;
+            } else {
+                detailsContainer.innerHTML = `<p class="text-red-500">${data.message}</p>`;
+            }
+        })
+        .catch(error => {
+            detailsContainer.innerHTML = `<p class="text-red-500">Error loading order details</p>`;
+            console.error(error);
+        });
+}
+*/
+
 function hideDetailsModal() {
-    document.getElementById('detailsModal').classList.add('hidden');
+    const modal = document.getElementById('detailsModal');
+    modal.classList.add('hidden');
 }
 
 function exportToExcel() {

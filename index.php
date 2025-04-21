@@ -4,12 +4,12 @@ require_once 'includes/header.php';
 ?>
 
 <!-- Hero Section -->
-<div class="hero-section transition-fade" style="background-image: url('/kwu/assets/images/hero-food.jpg');">
+<div class="hero-section transition-fade" style="background-image: url('../assets/images/hero-food.jpg');">
     <div class="hero-overlay flex items-center justify-center">
         <div class="text-center">
             <h1 class="text-5xl md:text-6xl font-bold text-white mb-6">Krauk-Krauk</h1>
             <p class="text-xl md:text-2xl text-white mb-8">Temukan dan pesan makanan favorit Anda dengan mudah</p>
-            <a href="<?= isset($_SESSION['user_id']) ? ($_SESSION['admin_value'] == 1 ? '/kwu/admin/dashboard.php' : '/kwu/customer/menu.php') : '/kwu/auth/login.php' ?>" 
+            <a href="<?= isset($_SESSION['user_id']) ? ($_SESSION['admin_value'] == 1 ? '../admin/dashboard.php' : '../customer/menu.php') : '../auth/login.php' ?>" 
                class="bg-orange-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-orange-700 transition">
                 <?= isset($_SESSION['admin_value']) && $_SESSION['admin_value'] == 1 ? 'Dashboard Admin' : 'Pesan Sekarang' ?>
             </a>
@@ -28,13 +28,13 @@ require_once 'includes/header.php';
         while ($menu = $stmt->fetch()) {
         ?>
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <img src="/kwu/assets/images/menu/<?= htmlspecialchars($menu['gambar']) ?>" alt="<?= htmlspecialchars($menu['nama']) ?>" class="w-full h-48 object-cover">
+            <img src="../assets/images/menu/<?= htmlspecialchars($menu['gambar']) ?>" alt="<?= htmlspecialchars($menu['nama']) ?>" class="w-full h-48 object-cover">
             <div class="p-4">
                 <h3 class="text-xl font-semibold mb-2"><?= htmlspecialchars($menu['nama']) ?></h3>
                 <p class="text-gray-600 mb-4"><?= htmlspecialchars($menu['deskripsi']) ?></p>
                 <div class="flex justify-between items-center">
                     <span class="font-bold text-orange-600">Rp <?= number_format($menu['harga'], 0, ',', '.') ?></span>
-                    <a href="<?= isset($_SESSION['user_id']) ? ($_SESSION['admin_value'] == 1 ? '/kwu/admin/dashboard.php' : '/kwu/customer/menu.php') : '/kwu/auth/login.php' ?>" 
+                    <a href="<?= isset($_SESSION['user_id']) ? ($_SESSION['admin_value'] == 1 ? '../admin/dashboard.php' : '../customer/menu.php') : '../auth/login.php' ?>" 
                        class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">
                         <?= isset($_SESSION['admin_value']) && $_SESSION['admin_value'] == 1 ? 'Dashboard' : 'Pesan' ?>
                     </a>
@@ -47,7 +47,7 @@ require_once 'includes/header.php';
     </div>
     
     <div class="text-center mt-8">
-        <a href="<?= isset($_SESSION['user_id']) ? ($_SESSION['admin_value'] == 1 ? '/kwu/admin/dashboard.php' : '/kwu/customer/menu.php') : '/kwu/auth/login.php' ?>" 
+        <a href="<?= isset($_SESSION['user_id']) ? ($_SESSION['admin_value'] == 1 ? '../admin/dashboard.php' : '../customer/menu.php') : '../auth/login.php' ?>" 
         class="text-orange-600 font-semibold hover:underline">
             <?= isset($_SESSION['admin_value']) && $_SESSION['admin_value'] == 1 ? 'Ke Dashboard' : 'Lihat Semua Menu' ?>
         </a>

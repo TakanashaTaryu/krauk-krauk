@@ -12,7 +12,7 @@ if (isAdmin()) {
 }
 
 // Check if this is a direct access or coming from cart
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['preview_order'])) {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && !isset($_SESSION['preview_order'])) {
     setAlert('error', 'Please review your cart first');
     redirect('../customer/cart.php');
 }
@@ -20,6 +20,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['preview_order'])) {
 // Get customer information
 $nama_pemesan = isset($_POST['nama_pemesan']) ? $_POST['nama_pemesan'] : '';
 $alamat_pemesan = isset($_POST['alamat_pemesan']) ? $_POST['alamat_pemesan'] : '';
+$latitude = isset($_POST['latitude']) ? $_POST['latitude'] : null;
+$longitude = isset($_POST['longitude']) ? $_POST['longitude'] : null;
+
+// Store form data in session for persistence
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview_order'])) {
+    $_SESSION['preview_order'] = true;
+    $_SESSION['nama_pemesan'] = $nama_pemesan;
+    $_SESSION['alamat_pemesan'] = $alamat_pemesan;
+    $_SESSION['latitude'] = $latitude;
+    $_SESSION['longitude'] = $longitude;
+} else if (isset($_SESSION['preview_order'])) {
+    // Retrieve from session if available
+    $nama_pemesan = $_SESSION['nama_pemesan'] ?? '';
+    $alamat_pemesan = $_SESSION['alamat_pemesan'] ?? '';
+    $latitude = $_SESSION['latitude'] ?? null;
+    $longitude = $_SESSION['longitude'] ?? null;
+}
 
 // Get cart items for preview
 $stmt = $pdo->prepare("
@@ -44,13 +61,12 @@ foreach ($cart_items as $item) {
 
 // Add taxes
 $qris_tax = 500; // Rp. 500,00
-//$web_tax = 500;  // Rp. 500,00
 $app_tax = 300;  // Rp. 300,00
 $tax_total = $qris_tax + $app_tax;
 $grand_total = $total + $tax_total;
 
 // Handle payment proof upload
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && $_FILES['payment_proof']['error'] === 0) {
     try {
         $pdo->beginTransaction();
 
@@ -64,14 +80,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
         $stmt = $pdo->prepare("
             INSERT INTO pesanan (
                 id_customer, total_harga, status, waktu_pemesanan,
-                nama_pemesan, alamat_pemesan, bukti_pembayaran
-            ) VALUES (?, ?, 'Menunggu Konfirmasi', NOW(), ?, ?, ?)
+                nama_pemesan, alamat_pemesan, latitude, longitude, bukti_pembayaran
+            ) VALUES (?, ?, 'Menunggu Konfirmasi', NOW(), ?, ?, ?, ?, ?)
         ");
         $stmt->execute([
             $_SESSION['user_id'],
-            $grand_total, // Use grand total including taxes
+            $grand_total,
             $nama_pemesan,
             $alamat_pemesan,
+            $latitude,
+            $longitude,
             $upload['filename']
         ]);
         $order_id = $pdo->lastInsertId();
@@ -100,6 +118,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
         // Clear cart
         $stmt = $pdo->prepare("DELETE FROM keranjang WHERE id_customer = ?");
         $stmt->execute([$_SESSION['user_id']]);
+
+        // Clear session data
+        unset($_SESSION['preview_order']);
+        unset($_SESSION['nama_pemesan']);
+        unset($_SESSION['alamat_pemesan']);
+        unset($_SESSION['latitude']);
+        unset($_SESSION['longitude']);
 
         $pdo->commit();
         
@@ -142,10 +167,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
                                 <p>QRIS Tax</p>
                                 <p>Rp <?= number_format($qris_tax, 0, ',', '.') ?></p>
                             </div>
-                            <!-- <div class="flex justify-between items-center text-sm text-gray-600">
-                                <p>Web Tax</p>
-                                <p>Rp <?= number_format($web_tax, 0, ',', '.') ?></p>
-                            </div> -->
                             <div class="flex justify-between items-center text-sm text-gray-600">
                                 <p>App Tax</p>
                                 <p>Rp <?= number_format($app_tax, 0, ',', '.') ?></p>
@@ -163,9 +184,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
                     <h2 class="text-xl font-semibold mb-4">Delivery Information</h2>
                     <input type="hidden" name="nama_pemesan" value="<?= htmlspecialchars($nama_pemesan) ?>">
                     <input type="hidden" name="alamat_pemesan" value="<?= htmlspecialchars($alamat_pemesan) ?>">
+                    <input type="hidden" name="latitude" value="<?= htmlspecialchars($latitude) ?>">
+                    <input type="hidden" name="longitude" value="<?= htmlspecialchars($longitude) ?>">
                     <div class="space-y-2">
-                        <p><span class="text-gray-600">Name:</span> <?= htmlspecialchars($nama_pemesan) ?></p>
-                        <p><span class="text-gray-600">Address:</span> <?= nl2br(htmlspecialchars($alamat_pemesan)) ?></p>
+                        <p><span class="text-gray-600">Nama:</span> <?= htmlspecialchars($nama_pemesan) ?></p>
+                        <p><span class="text-gray-600">Alamat:</span> <?= nl2br(htmlspecialchars($alamat_pemesan)) ?></p>
+                        
+                        <!-- Display Map -->
+                        <?php if ($latitude && $longitude): ?>
+                        <div class="mt-3">
+                            <p class="text-gray-600 mb-2">Lokasi Pengiriman:</p>
+                            <div id="map" class="w-full h-48 rounded-md border"></div>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -202,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
                         Confirm Payment & Place Order
                     </button>
                     
-                    <a href="cart.php" class="block text-center text-gray-600 hover:underline">
+                    <a href="../customer/cart.php" class="block text-center text-gray-600 hover:underline">
                         Back to Cart
                     </a>
                 </div>
@@ -210,5 +241,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof'])) {
         </form>
     </div>
 </div>
+
+<!-- Leaflet CSS and JS for Payment Page -->
+<?php if ($latitude && $longitude): ?>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deliveryLocation = [<?= $latitude ?>, <?= $longitude ?>];
+    
+    const map = L.map('map').setView(deliveryLocation, 15);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Add marker at delivery location
+    L.marker(deliveryLocation).addTo(map);
+});
+</script>
+<?php endif; ?>
 
 <?php require_once '../includes/footer.php'; ?>

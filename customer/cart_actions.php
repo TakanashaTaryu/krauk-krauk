@@ -28,9 +28,8 @@ if ($action === 'remove') {
         echo json_encode([
             'success' => true,
             'message' => 'Item removed successfully',
-            'newTotal' => $cartInfo['total'],
-            'isEmpty' => $cartInfo['count'] === 0,
-            'itemCount' => $cartInfo['count']
+            'total' => $cartInfo['total'],
+            'count' => $cartInfo['count']
         ]);
     } else {
         header('Content-Type: application/json');
@@ -81,10 +80,9 @@ if ($action === 'remove') {
         echo json_encode([
             'success' => true,
             'message' => 'Quantity updated successfully',
-            'newTotal' => $cartInfo['total'],
-            'isEmpty' => $cartInfo['count'] === 0,
-            'itemCount' => $cartInfo['count'],
-            'itemSubtotal' => $itemSubtotal
+            'total' => $cartInfo['total'],
+            'count' => $cartInfo['count'],
+            'item_subtotal' => $itemSubtotal
         ]);
     } else {
         header('Content-Type: application/json');

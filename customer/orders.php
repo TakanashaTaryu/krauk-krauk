@@ -49,148 +49,202 @@ if (!isset($order)) {
 ?>
 
 <div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto">
-        <?php if (isset($order)): ?>
-        <!-- Single Order Details -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-start mb-6">
-                <h1 class="text-2xl font-bold">Order #<?= $order['id'] ?></h1>
-                <span class="px-3 py-1 rounded-full text-sm <?= getStatusClass($order['status']) ?>">
-                    <?= ucfirst($order['status']) ?>
-                </span>
+    <?php if (isset($order)): ?>
+        <!-- Order Detail View -->
+        <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold">Order #<?= $order['id'] ?></h1>
+                <a href="../customer/orders.php" class="text-orange-600 hover:underline inline-flex items-center">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Orders
+                </a>
             </div>
             
-            <div class="mb-6">
-                <p class="text-gray-600">
-                    Ordered on <?= date('F j, Y g:i A', strtotime($order['waktu_pemesanan'])) ?>
-                </p>
-            </div>
-
-            <!-- Delivery Information -->
-            <div class="mb-6 bg-gray-50 p-4 rounded-lg">
-                <h3 class="font-bold mb-3">Delivery Information</h3>
-                <div class="grid grid-cols-1 gap-3">
-                    <div>
-                        <p class="text-gray-600">Recipient Name:</p>
-                        <p class="font-medium"><?= htmlspecialchars($order['nama_pemesan']) ?></p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Delivery Address:</p>
-                        <p class="font-medium whitespace-pre-line"><?= htmlspecialchars($order['alamat_pemesan']) ?></p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Order Status -->
+                <div class="md:col-span-3">
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <div class="flex flex-wrap justify-between items-center mb-4">
+                            <div>
+                                <h2 class="text-xl font-semibold">Status</h2>
+                                <p class="text-lg font-bold text-orange-600 mt-1"><?= htmlspecialchars($order['status']) ?></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-gray-600">Order Date</p>
+                                <p class="font-medium"><?= date('d M Y H:i', strtotime($order['waktu_pemesanan'])) ?></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Order Progress Tracker -->
+                        <div class="relative pt-8">
+                            <?php
+                            $statuses = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan'];
+                            $currentStatusIndex = array_search($order['status'], $statuses);
+                            ?>
+                            <div class="flex justify-between mb-2">
+                                <?php foreach ($statuses as $index => $status): ?>
+                                <div class="text-center flex-1">
+                                    <div class="<?= $index <= $currentStatusIndex ? 'text-orange-600' : 'text-gray-400' ?> text-xs md:text-sm">
+                                        <?= $status ?>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="overflow-hidden h-2 mb-4 flex rounded bg-gray-200">
+                                <?php
+                                $progressWidth = ($currentStatusIndex + 1) * 25;
+                                ?>
+                                <div style="width: <?= $progressWidth ?>%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-orange-600"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Payment Proof -->
-            <div class="mb-6">
-                <h3 class="font-bold mb-2">Payment Proof</h3>
-                <?php if ($order['bukti_pembayaran']): ?>
-                    <img src="../assets/images/uploads/<?= htmlspecialchars($order['bukti_pembayaran']) ?>" 
-                         alt="Payment Proof" 
-                         class="max-w-sm rounded-lg shadow cursor-pointer"
-                         onclick="showFullImage(this.src)"
-                         title="Click to view full size">
-                <?php else: ?>
-                    <p class="text-gray-500 italic">No payment proof uploaded yet</p>
-                <?php endif; ?>
-            </div>
-            
-            <div class="mb-6">
-                <h3 class="font-bold mb-4">Order Items</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="border-b">
-                                <th class="text-left py-2">Item</th>
-                                <th class="text-right py-2">Price</th>
-                                <th class="text-right py-2">Quantity</th>
-                                <th class="text-right py-2">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                
+                <!-- Order Items -->
+                <div class="md:col-span-2">
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h2 class="text-xl font-semibold mb-4">Order Items</h2>
+                        <div class="space-y-4">
                             <?php foreach ($order_items as $item): ?>
-                            <tr class="border-b">
-                                <td class="py-2"><?= htmlspecialchars($item['menu_name']) ?></td>
-                                <td class="text-right py-2">Rp <?= number_format($item['menu_price'], 0, ',', '.') ?></td>
-                                <td class="text-right py-2"><?= $item['jumlah'] ?></td>
-                                <td class="text-right py-2">Rp <?= number_format($item['menu_price'] * $item['jumlah'], 0, ',', '.') ?></td>
-                            </tr>
+                            <div class="flex justify-between items-center border-b pb-4">
+                                <div>
+                                    <p class="font-medium"><?= htmlspecialchars($item['menu_name']) ?></p>
+                                    <p class="text-sm text-gray-500"><?= $item['jumlah'] ?> x Rp <?= number_format($item['harga_satuan'], 0, ',', '.') ?></p>
+                                </div>
+                                <p class="font-medium">Rp <?= number_format($item['jumlah'] * $item['harga_satuan'], 0, ',', '.') ?></p>
+                            </div>
                             <?php endforeach; ?>
-                            <tr class="font-bold">
-                                <td colspan="3" class="text-right py-2">Total:</td>
-                                <td class="text-right py-2">Rp <?= number_format($order['total_harga'], 0, ',', '.') ?></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div class="text-center">
-                <a href="orders.php" class="text-orange-600 hover:underline">← Back to Orders</a>
-            </div>
-        </div>
-        
-        <?php else: ?>
-        <!-- Orders List -->
-        <h1 class="text-3xl font-bold mb-8">Your Orders</h1>
-        
-        <?php if (empty($orders)): ?>
-        <div class="bg-white rounded-lg shadow p-6 text-center">
-            <p class="text-gray-500 mb-4">You haven't placed any orders yet.</p>
-            <a href="menu.php" class="text-orange-600 hover:underline">Browse Menu →</a>
-        </div>
-        <?php else: ?>
-        <div class="space-y-4">
-            <?php foreach ($orders as $order): ?>
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h3 class="font-bold">Order #<?= $order['id'] ?></h3>
-                        <p class="text-sm text-gray-500">
-                            <?= date('F j, Y g:i A', strtotime($order['waktu_pemesanan'])) ?>
-                        </p>
-                        <p class="text-sm text-gray-600 mt-1">
-                            <?= htmlspecialchars($order['nama_pemesan']) ?>
-                        </p>
+                            
+                            <div class="pt-2 space-y-2">
+                                <div class="flex justify-between items-center text-sm text-gray-600">
+                                    <p>Subtotal</p>
+                                    <?php
+                                    $subtotal = 0;
+                                    foreach ($order_items as $item) {
+                                        $subtotal += $item['jumlah'] * $item['harga_satuan'];
+                                    }
+                                    $tax = $order['total_harga'] - $subtotal;
+                                    ?>
+                                    <p>Rp <?= number_format($subtotal, 0, ',', '.') ?></p>
+                                </div>
+                                <div class="flex justify-between items-center text-sm text-gray-600">
+                                    <p>Tax</p>
+                                    <p>Rp <?= number_format($tax, 0, ',', '.') ?></p>
+                                </div>
+                                <div class="flex justify-between items-center font-bold pt-2">
+                                    <p>Total</p>
+                                    <p>Rp <?= number_format($order['total_harga'], 0, ',', '.') ?></p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-sm <?= getStatusClass($order['status']) ?>">
-                        <?= ucfirst($order['status']) ?>
-                    </span>
                 </div>
                 
-                <div class="flex justify-between items-center mb-4">
-                    <p class="text-gray-600"><?= $order['total_items'] ?> items</p>
-                    <p class="font-bold">Rp <?= number_format($order['total_harga'], 0, ',', '.') ?></p>
-                </div>
-                
-                <div class="text-right">
-                    <a href="?id=<?= $order['id'] ?>" class="text-orange-600 hover:underline">
-                        View Details →
-                    </a>
+                <!-- Delivery Information -->
+                <div class="md:col-span-1">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-semibold mb-4">Delivery Information</h2>
+                        <div class="space-y-2">
+                            <p><span class="text-gray-600">Name:</span> <?= htmlspecialchars($order['nama_pemesan']) ?></p>
+                            <p><span class="text-gray-600">Address:</span> <?= nl2br(htmlspecialchars($order['alamat_pemesan'])) ?></p>
+                            
+                            <!-- Display Map if coordinates are available -->
+                            <?php if (!empty($order['latitude']) && !empty($order['longitude'])): ?>
+                            <div class="mt-4">
+                                <p class="text-gray-600 mb-2">Delivery Location:</p>
+                                <div id="map" class="w-full h-48 rounded-md border"></div>
+                            </div>
+                            
+                            <!-- Leaflet Map -->
+                            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+                            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                            <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const deliveryLocation = [<?= $order['latitude'] ?>, <?= $order['longitude'] ?>];
+                                
+                                const map = L.map('map').setView(deliveryLocation, 15);
+                                
+                                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                }).addTo(map);
+                                
+                                // Add marker at delivery location
+                                L.marker(deliveryLocation).addTo(map);
+                            });
+                            </script>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <?php endforeach; ?>
         </div>
+    <?php else: ?>
+        <!-- Orders List View -->
+        <h1 class="text-3xl font-bold mb-8">My Orders</h1>
+        
+        <?php if (count($orders) > 0): ?>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <?php foreach ($orders as $order): ?>
+                <a href="?id=<?= $order['id'] ?>" class="block">
+                    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-lg font-semibold">Order #<?= $order['id'] ?></h3>
+                                <p class="text-sm text-gray-500"><?= date('d M Y H:i', strtotime($order['waktu_pemesanan'])) ?></p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-medium 
+                                <?php
+                                switch ($order['status']) {
+                                    case 'Menunggu Konfirmasi':
+                                        echo 'bg-yellow-100 text-yellow-800';
+                                        break;
+                                    case 'Diterima':
+                                        echo 'bg-blue-100 text-blue-800';
+                                        break;
+                                    case 'Diproses':
+                                        echo 'bg-purple-100 text-purple-800';
+                                        break;
+                                    case 'Diperjalanan':
+                                        echo 'bg-orange-100 text-orange-800';
+                                        break;
+                                    case 'Selesai':
+                                        echo 'bg-green-100 text-green-800';
+                                        break;
+                                    case 'Dibatalkan':
+                                        echo 'bg-red-100 text-red-800';
+                                        break;
+                                    default:
+                                        echo 'bg-gray-100 text-gray-800';
+                                }
+                                ?>">
+                                <?= htmlspecialchars($order['status']) ?>
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-600"><?= $order['total_items'] ?> items</p>
+                                <p class="font-medium">Rp <?= number_format($order['total_harga'], 0, ',', '.') ?></p>
+                            </div>
+                            <div class="text-orange-600">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div class="bg-white rounded-lg shadow-md p-8 text-center">
+                <div class="text-gray-500 mb-4">
+                    <i class="fas fa-shopping-bag text-5xl"></i>
+                </div>
+                <h2 class="text-2xl font-semibold mb-4">No orders yet</h2>
+                <p class="text-gray-600 mb-6">You haven't placed any orders yet.</p>
+                <a href="../customer/menu.php" class="bg-orange-600 text-white py-2 px-6 rounded-md hover:bg-orange-700 transition inline-block">
+                    Browse Menu
+                </a>
+            </div>
         <?php endif; ?>
-        <?php endif; ?>
-    </div>
+    <?php endif; ?>
 </div>
 
-<?php
-function getStatusClass($status) {
-    switch($status) {
-        case 'Menunggu Konfirmasi':
-            return 'bg-yellow-100 text-yellow-800';
-        case 'Diterima':
-            return 'bg-green-100 text-green-800';
-        case 'Diproses':
-            return 'bg-blue-100 text-blue-800';
-        case 'Diperjalanan':
-            return 'bg-purple-100 text-purple-800';
-        default:
-            return 'bg-gray-100 text-gray-800';
-    }
-}
-
-require_once '../includes/footer.php';
-?>
+<?php require_once '../includes/footer.php'; ?>

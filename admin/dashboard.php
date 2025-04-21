@@ -18,6 +18,10 @@ $pendingOrders = $stmt->fetch()['total'];
 $stmt = $pdo->query("SELECT COUNT(*) as total FROM pesanan");
 $totalOrders = $stmt->fetch()['total'];
 
+// Get orders in transit count
+$stmt = $pdo->query("SELECT COUNT(*) as total FROM pesanan WHERE status = 'Diperjalanan'");
+$inTransitOrders = $stmt->fetch()['total'];
+
 // Get financial data
 $stmt = $pdo->query("SELECT SUM(total_harga) as total FROM pesanan WHERE status = 'Diterima'");
 $totalRevenue = $stmt->fetch()['total'] ?? 0;
@@ -100,7 +104,7 @@ $monthlyRevenue = $stmt->fetchAll();
     </div>
     
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-gray-500">Total Customers</h3>
@@ -131,6 +135,14 @@ $monthlyRevenue = $stmt->fetchAll();
                 <i class="fas fa-shopping-bag text-2xl text-orange-500"></i>
             </div>
             <p class="text-3xl font-bold text-gray-800"><?= $todayOrders ?></p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-gray-500">In Transit</h3>
+                <i class="fas fa-truck text-2xl text-orange-500"></i>
+            </div>
+            <p class="text-3xl font-bold text-gray-800"><?= $inTransitOrders ?></p>
         </div>
     </div>
     
@@ -217,7 +229,7 @@ $monthlyRevenue = $stmt->fetchAll();
     </div>
     
     <!-- Quick Links -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <a href="manage_menu.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-bold text-gray-800">Manage Menu</h3>
@@ -240,6 +252,14 @@ $monthlyRevenue = $stmt->fetchAll();
                 <i class="fas fa-clipboard-list text-2xl text-orange-500"></i>
             </div>
             <p class="text-gray-600">View and process customer orders</p>
+        </a>
+        
+        <a href="driver_orders.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Driver Dashboard</h3>
+                <i class="fas fa-truck text-2xl text-orange-500"></i>
+            </div>
+            <p class="text-gray-600">View and manage deliveries in transit</p>
         </a>
     </div>
 </div>

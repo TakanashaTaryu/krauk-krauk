@@ -123,7 +123,6 @@ foreach ($cart_items as $item) {
             </div>
             
             <div class="mb-4">
-                <br>
                 <a href="../customer/menu.php" class="text-orange-600 hover:underline inline-flex items-center">
                     <i class="fas fa-arrow-left mr-2"></i> Continue Shopping
                 </a>
@@ -152,6 +151,15 @@ foreach ($cart_items as $item) {
                                   placeholder="Enter your delivery address"
                                   required></textarea>
                     </div>
+                    
+                    <!-- Location Picker -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pin Lokasi Anda</label>
+                        <div id="map" class="w-full h-64 rounded-md border mb-2"></div>
+                        <p class="text-sm text-gray-500 mb-2">Geser pin untuk menentukan lokasi yang tepat</p>
+                        <input type="hidden" id="latitude" name="latitude" required>
+                        <input type="hidden" id="longitude" name="longitude" required>
+                    </div>
                 </div>
             </div>
 
@@ -179,6 +187,10 @@ foreach ($cart_items as $item) {
     </div>
     <?php endif; ?>
 </div>
+
+<!-- Leaflet CSS and JS (Open Source Maps) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 function removeItem(cartId) {
@@ -211,10 +223,20 @@ function removeItem(cartId) {
             .then(data => {
                 if (data.success) {
                     const row = document.querySelector(`tr[data-cart-id="${cartId}"]`);
+                    const mobileCard = document.querySelector(`div[data-cart-id="${cartId}"]`);
+                    
                     if (row) {
                         row.style.opacity = '0';
                         setTimeout(() => {
                             row.remove();
+                            updateCartDisplay(data);
+                        }, 300);
+                    }
+                    
+                    if (mobileCard) {
+                        mobileCard.style.opacity = '0';
+                        setTimeout(() => {
+                            mobileCard.remove();
                             updateCartDisplay(data);
                         }, 300);
                     }
@@ -252,14 +274,16 @@ function updateQuantity(cartId, quantity) {
     })
     .then(data => {
         if (data.success) {
-            // Update the subtotal for this specific item
-            const row = document.querySelector(`tr[data-cart-id="${cartId}"]`);
-            if (row) {
-                const subtotalCell = row.querySelector('.subtotal');
-                if (subtotalCell && data.itemSubtotal) {
-                    subtotalCell.textContent = `Rp ${new Intl.NumberFormat('id-ID').format(data.itemSubtotal)}`;
+            // Update the subtotal for this item
+            const rows = document.querySelectorAll(`[data-cart-id="${cartId}"]`);
+            rows.forEach(row => {
+                const subtotalElement = row.querySelector('.subtotal');
+                if (subtotalElement) {
+                    subtotalElement.textContent = `Rp ${formatNumber(data.item_subtotal)}`;
                 }
-            }
+            });
+            
+            // Update the total price
             updateCartDisplay(data);
         } else {
             throw new Error(data.message || 'Failed to update quantity');
@@ -275,65 +299,136 @@ function updateQuantity(cartId, quantity) {
 }
 
 function updateCartDisplay(data) {
-    // Update cart badge in both desktop and mobile menus
-    const cartBadges = document.querySelectorAll('.fa-shopping-cart + span');
-    cartBadges.forEach(badge => {
-        if (data.itemCount > 0) {
-            badge.textContent = data.itemCount;
-            badge.classList.remove('hidden');
-        } else {
-            badge.classList.add('hidden');
-        }
-    });
-
     // Update total price
-    const totalElement = document.querySelector('.total-price');
-    if (totalElement) {
-        totalElement.textContent = `Rp ${new Intl.NumberFormat('id-ID').format(data.newTotal)}`;
-    }
-
-    // Reload if cart is empty
-    if (data.isEmpty) {
-        setTimeout(() => window.location.reload(), 1000);
+    const totalElements = document.querySelectorAll('.total-price');
+    totalElements.forEach(el => {
+        el.textContent = `Rp ${formatNumber(data.total)}`;
+    });
+    
+    // If cart is empty, reload the page to show empty cart message
+    if (data.count === 0) {
+        location.reload();
     }
 }
 
-// Form validation
-document.getElementById('checkoutForm')?.addEventListener('submit', function(e) {
-    const nama = document.getElementById('nama_pemesan').value.trim();
-    const alamat = document.getElementById('alamat_pemesan').value.trim();
-    
-    if (!nama || !alamat) {
-        e.preventDefault();
-        Swal.fire({
-            icon: 'error',
-            title: 'Required Information',
-            text: 'Please fill in both name and delivery address'
+function formatNumber(number) {
+    return new Intl.NumberFormat('id-ID').format(number);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize map if cart has items
+    if (document.getElementById('map')) {
+        // Default location (Indonesia)
+        let defaultLat = -6.200000;
+        let defaultLng = 106.816666;
+        let map = L.map('map').setView([defaultLat, defaultLng], 13);
+        let marker;
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Try to get user's current location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    
+                    map.setView([userLat, userLng], 15);
+                    
+                    // Place marker at user's location
+                    if (marker) {
+                        marker.setLatLng([userLat, userLng]);
+                    } else {
+                        marker = L.marker([userLat, userLng], {draggable: true}).addTo(map);
+                        
+                        // Update hidden inputs when marker is dragged
+                        marker.on('dragend', function(e) {
+                            document.getElementById('latitude').value = marker.getLatLng().lat;
+                            document.getElementById('longitude').value = marker.getLatLng().lng;
+                        });
+                    }
+                    
+                    // Set initial values for hidden inputs
+                    document.getElementById('latitude').value = userLat;
+                    document.getElementById('longitude').value = userLng;
+                },
+                function(error) {
+                    // If geolocation fails, use default location
+                    placeDefaultMarker();
+                    console.log("Geolocation error:", error.message);
+                }
+            );
+        } else {
+            // Browser doesn't support geolocation
+            placeDefaultMarker();
+            console.log("Geolocation not supported by this browser");
+        }
+        
+        // Function to place marker at default location
+        function placeDefaultMarker() {
+            marker = L.marker([defaultLat, defaultLng], {draggable: true}).addTo(map);
+            
+            // Update hidden inputs when marker is dragged
+            marker.on('dragend', function(e) {
+                document.getElementById('latitude').value = marker.getLatLng().lat;
+                document.getElementById('longitude').value = marker.getLatLng().lng;
+            });
+            
+            // Set initial values for hidden inputs
+            document.getElementById('latitude').value = defaultLat;
+            document.getElementById('longitude').value = defaultLng;
+        }
+        
+        // Allow clicking on map to move marker
+        map.on('click', function(e) {
+            const clickLat = e.latlng.lat;
+            const clickLng = e.latlng.lng;
+            
+            if (marker) {
+                marker.setLatLng([clickLat, clickLng]);
+            } else {
+                marker = L.marker([clickLat, clickLng], {draggable: true}).addTo(map);
+                
+                // Update hidden inputs when marker is dragged
+                marker.on('dragend', function(e) {
+                    document.getElementById('latitude').value = marker.getLatLng().lat;
+                    document.getElementById('longitude').value = marker.getLatLng().lng;
+                });
+            }
+            
+            // Update hidden inputs
+            document.getElementById('latitude').value = clickLat;
+            document.getElementById('longitude').value = clickLng;
         });
     }
+    
+    // Form validation
+    document.getElementById('checkoutForm')?.addEventListener('submit', function(e) {
+        const nama = document.getElementById('nama_pemesan').value.trim();
+        const alamat = document.getElementById('alamat_pemesan').value.trim();
+        const latitude = document.getElementById('latitude').value.trim();
+        const longitude = document.getElementById('longitude').value.trim();
+        
+        if (!nama || !alamat) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Data Tidak Lengkap',
+                text: 'Mohon isi nama dan alamat pengiriman'
+            });
+        } else if (!latitude || !longitude) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Lokasi Diperlukan',
+                text: 'Mohon tentukan lokasi Anda pada peta'
+            });
+        }
+    });
 });
 </script>
-
-<style>
-tr[data-cart-id], div[data-cart-id] {
-    transition: opacity 0.3s ease-out;
-}
-
-@media (max-width: 768px) {
-    .container {
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
-    
-    h1 {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .bg-white {
-        border-radius: 0.5rem;
-    }
-}
-</style>
 
 <?php require_once '../includes/footer.php'; ?>

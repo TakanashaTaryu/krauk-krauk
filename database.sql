@@ -107,4 +107,8 @@
   ALTER TABLE `pesanan_detail`
     ADD CONSTRAINT `pesanan_detail_ibfk_1` FOREIGN KEY (`id_pesanan`) REFERENCES `pesanan` (`id`) ON DELETE CASCADE,
     ADD CONSTRAINT `pesanan_detail_ibfk_2` FOREIGN KEY (`id_menu`) REFERENCES `menu` (`id`) ON DELETE CASCADE;
+  
+  ALTER TABLE pesanan 
+  ADD COLUMN latitude DECIMAL(10, 8) NULL AFTER alamat_pemesan,
+  ADD COLUMN longitude DECIMAL(11, 8) NULL AFTER latitude;
   COMMIT;

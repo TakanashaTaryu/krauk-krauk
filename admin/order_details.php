@@ -51,11 +51,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 ?>
 
 <div class="container mx-auto px-4 py-8">
+    <!-- Add this near the top of the order details page, in the order header section -->
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">Order #<?= $order['id'] ?></h1>
-        <a href="manage_orders.php" class="text-orange-600 hover:underline inline-flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Back to Orders
-        </a>
+        <div class="flex space-x-4">
+            <a href="chat.php?order_id=<?= $order['id'] ?>" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition flex items-center">
+                <i class="fas fa-comment mr-2"></i> Chat with Customer
+            </a>
+            <a href="manage_orders.php" class="text-orange-600 hover:underline inline-flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Orders
+            </a>
+        </div>
     </div>
     
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -255,3 +261,86 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 </div>
 
 <?php require_once '../includes/footer.php'; ?>
+
+
+<?php
+// Add this function near the top of the file after the order data is fetched
+
+// Check if a chat conversation exists for this order
+$stmt = $pdo->prepare("SELECT id FROM chat_conversations WHERE id_pesanan = ?");
+$stmt->execute([$order_id]);
+$conversation = $stmt->fetch();
+
+// If no conversation exists and admin wants to start one
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start_conversation'])) {
+    // Create new conversation
+    $stmt = $pdo->prepare("INSERT INTO chat_conversations (id_pesanan) VALUES (?)");
+    $stmt->execute([$order_id]);
+    $conversation_id = $pdo->lastInsertId();
+    
+    // Add initial message
+    $message = trim($_POST['initial_message']);
+    if (!empty($message)) {
+        $stmt = $pdo->prepare("
+            INSERT INTO chat_messages (id_conversation, sender_id, is_admin, message)
+            VALUES (?, ?, 1, ?)
+        ");
+        $stmt->execute([$conversation_id, $_SESSION['user_id'], $message]);
+    }
+    
+    // Redirect to chat page
+    redirect("chat.php?conversation_id=$conversation_id");
+}
+?>
+
+<!-- Add this modal at the bottom of the file, before the closing body tag -->
+<div id="chatModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Start Conversation</h3>
+            <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form method="POST">
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2">Initial Message</label>
+                <textarea name="initial_message" rows="4" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Type your message to the customer..."></textarea>
+            </div>
+            
+            <div class="flex justify-end">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-md mr-2">Cancel</button>
+                <button type="submit" name="start_conversation" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">Send Message</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openModal() {
+    document.getElementById('chatModal').classList.remove('hidden');
+    document.getElementById('chatModal').classList.add('flex');
+}
+
+function closeModal() {
+    document.getElementById('chatModal').classList.add('hidden');
+    document.getElementById('chatModal').classList.remove('flex');
+}
+
+// Update the chat button to either open modal or go to existing chat
+document.addEventListener('DOMContentLoaded', function() {
+    const chatButton = document.querySelector('[href^="chat.php?order_id="]');
+    <?php if ($conversation): ?>
+    // If conversation exists, keep the link as is
+    chatButton.href = "chat.php?conversation_id=<?= $conversation['id'] ?>";
+    <?php else: ?>
+    // If no conversation, open modal instead
+    chatButton.href = "javascript:void(0)";
+    chatButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        openModal();
+    });
+    <?php endif; ?>
+});
+</script>

@@ -33,8 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && $_POST['st
 
 // Proses step 2 - Update password
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && $_POST['step'] == 2) {
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+    $password = clean($_POST['password']);
+    $confirm_password = clean($_POST['confirm_password'])   ;
     
     // Validasi
     if (empty($password) || empty($confirm_password)) {

@@ -99,6 +99,68 @@ if (!isset($order)) {
                     </div>
                 </div>
                 
+                <!-- Feedback Section - Only show when status is "Telah Sampai" -->
+                <?php if ($order['status'] === 'Telah Sampai'): ?>
+                    <?php
+                    // Check if feedback already exists
+                    $stmt = $pdo->prepare("SELECT * FROM feedback WHERE id_pesanan = ?");
+                    $stmt->execute([$order['id']]);
+                    $feedback = $stmt->fetch();
+                    ?>
+                    <div class="md:col-span-3" id="feedback">
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h2 class="text-xl font-semibold mb-4">
+                                <?= $feedback ? 'Your Feedback' : 'Rate Your Order' ?>
+                            </h2>
+                            
+                            <?php if ($feedback): ?>
+                                <!-- Display existing feedback -->
+                                <div class="mb-4">
+                                    <div class="flex items-center mb-2">
+                                        <div class="flex text-yellow-400">
+                                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                                <i class="fas fa-star <?= $i <= $feedback['rating'] ? 'text-yellow-400' : 'text-gray-300' ?>"></i>
+                                            <?php endfor; ?>
+                                        </div>
+                                        <span class="ml-2 text-gray-600"><?= date('d M Y', strtotime($feedback['created_at'])) ?></span>
+                                    </div>
+                                    <?php if (!empty($feedback['komentar'])): ?>
+                                        <p class="text-gray-700"><?= nl2br(htmlspecialchars($feedback['komentar'])) ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            <?php else: ?>
+                                <!-- Feedback Form -->
+                                <form method="POST" action="submit_feedback.php">
+                                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                                    
+                                    <div class="mb-4">
+                                        <label class="block text-gray-700 mb-2">Rating</label>
+                                        <div class="flex space-x-2">
+                                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <div>
+                                                <input type="radio" name="rating" id="rating-<?= $i ?>" value="<?= $i ?>" class="hidden peer" <?= $i === 5 ? 'checked' : '' ?>>
+                                                <label for="rating-<?= $i ?>" class="cursor-pointer text-2xl peer-checked:text-yellow-400 text-gray-300 hover:text-yellow-400">
+                                                    <i class="fas fa-star"></i>
+                                                </label>
+                                            </div>
+                                            <?php endfor; ?>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label for="comment" class="block text-gray-700 mb-2">Comments (Optional)</label>
+                                        <textarea id="comment" name="comment" rows="3" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Share your experience with this order..."></textarea>
+                                    </div>
+                                    
+                                    <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition">
+                                        Submit Feedback
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endif;?>
+                
                 <!-- Order Items and Payment Summary -->
                 <div class="md:col-span-2">
                     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -192,7 +254,7 @@ if (!isset($order)) {
                             <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
                             <script>
                             document.addEventListener('DOMContentLoaded', function() {
-                                const deliveryLocation = [<?= $order['latitude'] ?>, <?= $order['longitude'] ?>];
+                                const deliveryLocation = [<?= (float)$order['latitude'] ?>, <?= (float)$order['longitude'] ?>];
                                 
                                 const map = L.map('map').setView(deliveryLocation, 15);
                                 
@@ -209,69 +271,6 @@ if (!isset($order)) {
                     </div>
                 </div>
             </div>
-            
-            <!-- Feedback Section - Only show when status is "Telah Sampai" -->
-            <?php if ($order['status'] === 'Telah Sampai'): ?>
-                <?php
-                // Check if feedback already exists
-                $stmt = $pdo->prepare("SELECT * FROM feedback WHERE id_pesanan = ?");
-                $stmt->execute([$order['id']]);
-                $feedback = $stmt->fetch();
-                ?>
-                <br>
-                <div class="md:col-span-3">
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h2 class="text-xl font-semibold mb-4">
-                            <?= $feedback ? 'Your Feedback' : 'Rate Your Order' ?>
-                        </h2>
-                        
-                        <?php if ($feedback): ?>
-                            <!-- Display existing feedback -->
-                            <div class="mb-4">
-                                <div class="flex items-center mb-2">
-                                    <div class="flex text-yellow-400">
-                                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                                            <i class="fas fa-star <?= $i <= $feedback['rating'] ? 'text-yellow-400' : 'text-gray-300' ?>"></i>
-                                        <?php endfor; ?>
-                                    </div>
-                                    <span class="ml-2 text-gray-600"><?= date('d M Y', strtotime($feedback['created_at'])) ?></span>
-                                </div>
-                                <?php if (!empty($feedback['komentar'])): ?>
-                                    <p class="text-gray-700"><?= nl2br(htmlspecialchars($feedback['komentar'])) ?></p>
-                                <?php endif; ?>
-                            </div>
-                        <?php else: ?>
-                            <!-- Feedback Form -->
-                            <form method="POST" action="submit_feedback.php">
-                                <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                                
-                                <div class="mb-4">
-                                    <label class="block text-gray-700 mb-2">Rating</label>
-                                    <div class="flex space-x-2">
-                                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                                        <div>
-                                            <input type="radio" name="rating" id="rating-<?= $i ?>" value="<?= $i ?>" class="hidden peer" <?= $i === 5 ? 'checked' : '' ?>>
-                                            <label for="rating-<?= $i ?>" class="cursor-pointer text-2xl peer-checked:text-yellow-400 text-gray-300 hover:text-yellow-400">
-                                                <i class="fas fa-star"></i>
-                                            </label>
-                                        </div>
-                                        <?php endfor; ?>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="comment" class="block text-gray-700 mb-2">Comments (Optional)</label>
-                                    <textarea id="comment" name="comment" rows="3" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Share your experience with this order..."></textarea>
-                                </div>
-                                
-                                <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition">
-                                    Submit Feedback
-                                </button>
-                            </form>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            <?php endif; ?>
         </div>
     <?php else: ?>
         <!-- Orders List View -->
@@ -279,9 +278,10 @@ if (!isset($order)) {
         
         <?php if (count($orders) > 0): ?>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Find this section in orders.php where the order cards are displayed -->
                 <?php foreach ($orders as $order): ?>
-                <a href="?id=<?= $order['id'] ?>" class="block">
-                    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <a href="?id=<?= $order['id'] ?>">
                         <div class="flex justify-between items-start mb-4">
                             <div>
                                 <h3 class="text-lg font-semibold">Order #<?= $order['id'] ?></h3>
@@ -333,8 +333,51 @@ if (!isset($order)) {
                                 <i class="fas fa-chevron-right"></i>
                             </div>
                         </div>
+                    </a>
+                    
+                    <!-- Chat button inside the order box -->
+                    <div class="border-t mt-4 pt-4 flex justify-between items-center">
+                        <?php
+                        // Check if a chat conversation exists for this order
+                        $stmt = $pdo->prepare("SELECT id FROM chat_conversations WHERE id_pesanan = ?");
+                        $stmt->execute([$order['id']]);
+                        $conversation = $stmt->fetch();
+                        
+                        if ($conversation) {
+                            // If conversation exists, show "Continue Chat" button
+                            echo '<a href="chat.php?conversation_id=' . $conversation['id'] . '" class="text-orange-600 hover:underline flex items-center">';
+                            echo '<i class="fas fa-comment mr-1"></i> Continue Chat</a>';
+                        } else {
+                            // If no conversation, show "Start Chat" button that creates a conversation directly
+                            echo '<a href="javascript:void(0)" onclick="startChat(' . $order['id'] . ')" class="text-orange-600 hover:underline flex items-center">';
+                            echo '<i class="fas fa-comment mr-1"></i> Start Chat</a>';
+                        }
+                        ?>
+                        
+                        <?php if ($order['status'] === 'Telah Sampai'): ?>
+                            <?php
+                            // Check if feedback already exists
+                            $stmt = $pdo->prepare("SELECT id FROM feedback WHERE id_pesanan = ?");
+                            $stmt->execute([$order['id']]);
+                            $feedback = $stmt->fetch();
+                            
+                            if ($feedback) {
+                                // If feedback exists, show "View Feedback" button
+                                echo '<a href="?id=' . $order['id'] . '#feedback" class="text-green-600 hover:underline flex items-center">';
+                                echo '<i class="fas fa-star mr-1"></i> View Feedback</a>';
+                            } else {
+                                // If no feedback, show "Rate Order" button
+                                echo '<a href="?id=' . $order['id'] . '#feedback" class="text-yellow-600 hover:underline flex items-center">';
+                                echo '<i class="fas fa-star mr-1"></i> Rate Order</a>';
+                            }
+                            ?>
+                        <?php else: ?>
+                            <a href="?id=<?= $order['id'] ?>" class="text-orange-600 hover:underline flex items-center">
+                                <i class="fas fa-eye mr-1"></i> View Details
+                            </a>
+                        <?php endif; ?>
                     </div>
-                </a>
+                </div>
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
@@ -353,8 +396,6 @@ if (!isset($order)) {
 </div>
 
 <?php require_once '../includes/footer.php'; ?>
-
-<!-- Add this right after the feedback form -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Star rating functionality
@@ -419,4 +460,55 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Function to start a new chat conversation
+function startChat(orderId) {
+    // Show a modal to get the initial message
+    Swal.fire({
+        title: 'Start Conversation',
+        html: `
+            <form id="chatForm">
+                <textarea id="initialMessage" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" 
+                          rows="4" placeholder="Type your message to customer service..."></textarea>
+            </form>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Send Message',
+        confirmButtonColor: '#ea580c',
+        cancelButtonText: 'Cancel',
+        preConfirm: () => {
+            const message = document.getElementById('initialMessage').value.trim();
+            if (!message) {
+                Swal.showValidationMessage('Please enter a message');
+                return false;
+            }
+            return message;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Create a form to submit the data
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'create_chat.php';
+            
+            // Add order ID
+            const orderIdInput = document.createElement('input');
+            orderIdInput.type = 'hidden';
+            orderIdInput.name = 'order_id';
+            orderIdInput.value = orderId;
+            form.appendChild(orderIdInput);
+            
+            // Add message
+            const messageInput = document.createElement('input');
+            messageInput.type = 'hidden';
+            messageInput.name = 'message';
+            messageInput.value = result.value;
+            form.appendChild(messageInput);
+            
+            // Submit the form
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+}
 </script>

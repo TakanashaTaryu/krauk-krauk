@@ -2,6 +2,11 @@
 session_start();
 require_once __DIR__ . '/../config/database.php';
 
+// Define BASE_URL constant if not already defined
+if (!defined('BASE_URL')) {
+    define('BASE_URL', '/kwu/');
+}
+
 // Move getAlert function call here to ensure it's processed before any output
 $alert = isset($_SESSION['alert']) ? $_SESSION['alert'] : null;
 if (isset($_SESSION['alert'])) {
@@ -17,6 +22,7 @@ if (isset($_SESSION['alert'])) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <style>
         /* Existing styles remain the same */
         .hero-section {
@@ -139,12 +145,42 @@ if (isset($_SESSION['alert'])) {
                     $_SESSION['admin_value'] = $user['admin_value'] ?? 0;
                     
                     if ($_SESSION['admin_value'] == 1): 
+                        // Get unread messages count for admin
+                        $stmt = $pdo->prepare("
+                            SELECT COUNT(*) as count 
+                            FROM chat_messages cm
+                            JOIN chat_conversations cc ON cm.id_conversation = cc.id
+                            WHERE cm.is_admin = 0 AND cm.is_read = 0
+                        ");
+                        $stmt->execute();
+                        $unread_messages = $stmt->fetch()['count'] ?? 0;
                     ?>
                         <a href="../admin/dashboard.php" class="text-gray-700 hover:text-orange-600">Dashboard</a>
                         <a href="../admin/manage_menu.php" class="text-gray-700 hover:text-orange-600">Menu</a>
                         <a href="../admin/manage_customers.php" class="text-gray-700 hover:text-orange-600">Customers</a>
                         <a href="../admin/manage_orders.php" class="text-gray-700 hover:text-orange-600">Pesanan</a>
-                    <?php else: ?>
+                        <!-- Fix the chat link for admin -->
+                        <a href="../admin/chat.php" class="text-gray-700 hover:text-orange-600 relative">
+                            <i class="fas fa-comment"></i> Messages
+                            <?php if ($unread_messages > 0): ?>
+                            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                <?= $unread_messages > 9 ? '9+' : $unread_messages ?>
+                            </span>
+                            <?php endif; ?>
+                        </a>
+                        
+                    <?php else: 
+                        // Get unread messages count for customer
+                        $stmt = $pdo->prepare("
+                            SELECT COUNT(*) as count 
+                            FROM chat_messages cm
+                            JOIN chat_conversations cc ON cm.id_conversation = cc.id
+                            JOIN pesanan p ON cc.id_pesanan = p.id
+                            WHERE p.id_customer = ? AND cm.is_admin = 1 AND cm.is_read = 0
+                        ");
+                        $stmt->execute([$_SESSION['user_id']]);
+                        $unread_messages = $stmt->fetch()['count'] ?? 0;
+                    ?>
                         <a href="../customer/menu.php" class="text-gray-700 hover:text-orange-600">Menu</a>
                         <a href="../customer/cart.php" class="text-gray-700 hover:text-orange-600">
                             <i class="fas fa-shopping-cart"></i>
@@ -160,6 +196,14 @@ if (isset($_SESSION['alert'])) {
                             ?>
                         </a>
                         <a href="../customer/orders.php" class="text-gray-700 hover:text-orange-600">Pesanan</a>
+                        <a href="../customer/chat.php" class="text-gray-700 hover:text-orange-600 relative">
+                            <i class="fas fa-comment"></i> Messages
+                            <?php if ($unread_messages > 0): ?>
+                            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                <?= $unread_messages > 9 ? '9+' : $unread_messages ?>
+                            </span>
+                            <?php endif; ?>
+                        </a>
                     <?php endif; ?>
                     <div class="inline-block relative group">
                         <button class="text-gray-700 hover:text-orange-600">
@@ -201,6 +245,14 @@ if (isset($_SESSION['alert'])) {
                     <a href="../admin/manage_orders.php" class="block py-3 border-b text-gray-700">Manage Orders</a>
                     <a href="../admin/kitchen_orders.php" class="block py-3 border-b text-gray-700">Kitchen Dashboard</a>
                     <a href="../admin/driver_orders.php" class="block py-3 border-b text-gray-700">Driver Dashboard</a>
+                    <a href="../admin/chat.php" class="block py-3 border-b text-gray-700 flex justify-between items-center">
+                        Messages
+                        <?php if (isset($unread_messages) && $unread_messages > 0): ?>
+                        <span class="bg-red-500 text-white text-xs rounded-full px-2 py-1">
+                            <?= $unread_messages > 9 ? '9+' : $unread_messages ?>
+                        </span>
+                        <?php endif; ?>
+                    </a>
                 <?php else: ?>
                     <a href="../customer/menu.php" class="block py-3 border-b text-gray-700">Menu</a>
                     <a href="../customer/cart.php" class="block py-3 border-b text-gray-700">
@@ -217,6 +269,14 @@ if (isset($_SESSION['alert'])) {
                         ?>
                     </a>
                     <a href="../customer/orders.php" class="block py-3 border-b text-gray-700">Pesanan</a>
+                    <a href="../customer/chat.php" class="block py-3 border-b text-gray-700 flex justify-between items-center">
+                        Messages
+                        <?php if (isset($unread_messages) && $unread_messages > 0): ?>
+                        <span class="bg-red-500 text-white text-xs rounded-full px-2 py-1">
+                            <?= $unread_messages > 9 ? '9+' : $unread_messages ?>
+                        </span>
+                        <?php endif; ?>
+                    </a>
                     <a href="../customer/profile.php" class="block py-3 border-b text-gray-700">Profil</a>
                 <?php endif; ?>
                 <a href="../auth/logout.php" class="block py-3 text-gray-700">Logout</a>

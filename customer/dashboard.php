@@ -27,6 +27,17 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$_SESSION['user_id']]);
 $cart_count = $stmt->fetch()['count'];
+
+// Get unread messages count
+$stmt = $pdo->prepare("
+    SELECT COUNT(*) as count 
+    FROM chat_messages cm
+    JOIN chat_conversations cc ON cm.id_conversation = cc.id
+    JOIN pesanan p ON cc.id_pesanan = p.id
+    WHERE p.id_customer = ? AND cm.is_admin = 1 AND cm.is_read = 0
+");
+$stmt->execute([$_SESSION['user_id']]);
+$unread_messages = $stmt->fetch()['count'] ?? 0;
 ?>
 
 <div class="container mx-auto px-4 py-8">
@@ -47,6 +58,12 @@ $cart_count = $stmt->fetch()['count'];
                     <a href="menu.php" class="block text-orange-600 hover:underline">Browse Menu</a>
                     <a href="orders.php" class="block text-orange-600 hover:underline">View All Orders</a>
                     <a href="profile.php" class="block text-orange-600 hover:underline">Update Profile</a>
+                    <a href="chat.php" class="flex items-center text-orange-600 hover:underline">
+                        Messages
+                        <?php if ($unread_messages > 0): ?>
+                        <span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1"><?= $unread_messages ?></span>
+                        <?php endif; ?>
+                    </a>
                 </div>
             </div>
         </div>
@@ -80,9 +97,14 @@ $cart_count = $stmt->fetch()['count'];
                         <p class="text-gray-600"><?= $order['total_items'] ?> items</p>
                         <p class="font-bold">Rp<?= number_format($order['total_harga'], 0, ',', '.') ?></p>
                     </div>
-                    <a href="orders.php?id=<?= $order['id'] ?>" class="text-sm text-orange-600 hover:underline">
-                        View Details →
-                    </a>
+                    <div class="flex justify-between items-center mt-2">
+                        <a href="orders.php?id=<?= $order['id'] ?>" class="text-sm text-orange-600 hover:underline">
+                            View Details →
+                        </a>
+                        <a href="chat.php?order_id=<?= $order['id'] ?>" class="text-sm text-orange-600 hover:underline flex items-center">
+                            <i class="fas fa-comment mr-1"></i> Chat with Admin
+                        </a>
+                    </div>
                 </div>
                 <?php endforeach; ?>
             </div>

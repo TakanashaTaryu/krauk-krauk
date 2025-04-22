@@ -72,8 +72,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
     try {
         $pdo->beginTransaction();
 
-        // Upload payment proof
-        $upload = uploadImage($_FILES['payment_proof'], '../assets/images/uploads/');
+        // Check file size (20MB limit)
+        if ($_FILES['payment_proof']['size'] > 20 * 1024 * 1024) {
+            throw new Exception('File size exceeds the 20MB limit');
+        }
+
+        // Upload payment proof with compression
+        $upload = uploadImage($_FILES['payment_proof'], '../assets/images/uploads/', true);
         if (!$upload['success']) {
             throw new Exception($upload['message']);
         }
@@ -239,6 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                                accept="image/*"
                                required
                                class="w-full border rounded-md px-3 py-2">
+                        <p class="text-xs text-gray-500 mt-1">Maximum file size: 8MB. Image will be compressed.</p>
                     </div>
                     
                     <button type="submit"

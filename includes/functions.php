@@ -79,3 +79,69 @@ if (!function_exists('isImage')) {
 // - isLoggedIn()
 // - isAdmin()
 // - uploadImage()
+
+/**
+ * Upload and process an image
+ * 
+ * @param array $file The uploaded file data
+ * @param string $target_dir The directory to save the file
+ * @param bool $compress Whether to compress the image
+ * @return array Result with success status and message
+ */
+function uploadImage($file, $target_dir, $compress = false) {
+    // Create directory if it doesn't exist
+    if (!file_exists($target_dir)) {
+        mkdir($target_dir, 0777, true);
+    }
+    
+    // Check if file is an actual image
+    $check = getimagesize($file["tmp_name"]);
+    if ($check === false) {
+        return ['success' => false, 'message' => 'File is not an image.'];
+    }
+    
+    // Generate a unique filename
+    $extension = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
+    $filename = uniqid() . '.' . $extension;
+    $target_file = $target_dir . $filename;
+    
+    // Check file size (8MB limit)
+    if ($file["size"] > 8 * 1024 * 1024) {
+        return ['success' => false, 'message' => 'File is too large. Maximum size is 8MB.'];
+    }
+    
+    // Allow only certain file formats
+    $allowed_types = ['jpg', 'jpeg', 'png'];
+    if (!in_array($extension, $allowed_types)) {
+        return ['success' => false, 'message' => 'Only JPG, JPEG, & PNG files are allowed.'];
+    }
+    
+    // If compression is enabled
+    if ($compress && in_array($extension, ['jpg', 'jpeg', 'png'])) {
+        // Create image resource based on file type
+        if ($extension == 'png') {
+            $image = imagecreatefrompng($file["tmp_name"]);
+        } else {
+            $image = imagecreatefromjpeg($file["tmp_name"]);
+        }
+        
+        // Set compression quality (0-100 for JPG, 0-9 for PNG)
+        if ($extension == 'png') {
+            // PNG compression (0-9)
+            imagepng($image, $target_file, 7); // Medium compression
+        } else {
+            // JPEG compression (0-100)
+            imagejpeg($image, $target_file, 50); // 50% quality
+        }
+        
+        // Free up memory
+        imagedestroy($image);
+    } else {
+        // Move the uploaded file without compression
+        if (!move_uploaded_file($file["tmp_name"], $target_file)) {
+            return ['success' => false, 'message' => 'There was an error uploading your file.'];
+        }
+    }
+    
+    return ['success' => true, 'filename' => $filename, 'path' => $target_file];
+}

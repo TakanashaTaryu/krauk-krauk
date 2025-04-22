@@ -153,9 +153,19 @@ foreach ($cart_items as $item) {
                                   required></textarea>
                     </div>
                     
-                    <!-- Location Picker -->
+                    <!-- Add notes field -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Pin Lokasi Anda</label>
+                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Special Instructions (Optional)</label>
+                        <textarea id="notes" 
+                                  name="notes"
+                                  rows="2" 
+                                  class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                  placeholder="E.g., No spicy food, house with green gate, etc."></textarea>
+                    </div>
+                    
+                    <!-- Location picker -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Lokasi Pengiriman</label>
                         <div id="map" class="w-full h-64 rounded-md border mb-2"></div>
                         <p class="text-sm text-gray-500 mb-2">Geser pin untuk menentukan lokasi yang tepat</p>
                         <input type="hidden" id="latitude" name="latitude" required>

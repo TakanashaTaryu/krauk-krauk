@@ -196,9 +196,11 @@ if (isset($_SESSION['alert'])) {
             <?php if (isset($_SESSION['user_id'])): ?>
                 <?php if ($_SESSION['admin_value'] == 1): ?>
                     <a href="../admin/dashboard.php" class="block py-3 border-b text-gray-700">Dashboard</a>
-                    <a href="../admin/manage_menu.php" class="block py-3 border-b text-gray-700">Menu</a>
-                    <a href="../admin/manage_customers.php" class="block py-3 border-b text-gray-700">Customers</a>
-                    <a href="../admin/manage_orders.php" class="block py-3 border-b text-gray-700">Pesanan</a>
+                    <a href="../admin/manage_menu.php" class="block py-3 border-b text-gray-700">Manage Menu</a>
+                    <a href="../admin/manage_customers.php" class="block py-3 border-b text-gray-700">Manage Customers</a>
+                    <a href="../admin/manage_orders.php" class="block py-3 border-b text-gray-700">Manage Orders</a>
+                    <a href="../admin/kitchen_orders.php" class="block py-3 border-b text-gray-700">Kitchen Dashboard</a>
+                    <a href="../admin/driver_orders.php" class="block py-3 border-b text-gray-700">Driver Dashboard</a>
                 <?php else: ?>
                     <a href="../customer/menu.php" class="block py-3 border-b text-gray-700">Menu</a>
                     <a href="../customer/cart.php" class="block py-3 border-b text-gray-700">

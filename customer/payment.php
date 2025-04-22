@@ -30,12 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview_order'])) {
     $_SESSION['alamat_pemesan'] = $alamat_pemesan;
     $_SESSION['latitude'] = $latitude;
     $_SESSION['longitude'] = $longitude;
+    $_SESSION['notes'] = $_POST['notes'] ?? null;
 } else if (isset($_SESSION['preview_order'])) {
     // Retrieve from session if available
     $nama_pemesan = $_SESSION['nama_pemesan'] ?? '';
     $alamat_pemesan = $_SESSION['alamat_pemesan'] ?? '';
     $latitude = $_SESSION['latitude'] ?? null;
     $longitude = $_SESSION['longitude'] ?? null;
+    $notes = $_SESSION['notes'] ?? null;
 }
 
 // Get cart items for preview
@@ -75,23 +77,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
         if (!$upload['success']) {
             throw new Exception($upload['message']);
         }
+        
+        // Store the payment proof filename
+        $payment_proof_filename = $upload['filename'];
 
+        // Get form data
+        $nama_pemesan = $_POST['nama_pemesan'];
+        $alamat_pemesan = $_POST['alamat_pemesan'];
+        $notes = isset($_POST['notes']) ? trim($_POST['notes']) : null;
+        $latitude = $_POST['latitude'] ?? null;
+        $longitude = $_POST['longitude'] ?? null;
+        
         // Create order
         $stmt = $pdo->prepare("
-            INSERT INTO pesanan (
-                id_customer, total_harga, status, waktu_pemesanan,
-                nama_pemesan, alamat_pemesan, latitude, longitude, bukti_pembayaran
-            ) VALUES (?, ?, 'Menunggu Konfirmasi', NOW(), ?, ?, ?, ?, ?)
+            INSERT INTO pesanan (id_customer, nama_pemesan, alamat_pemesan, notes, latitude, longitude, total_harga, bukti_pembayaran, status, waktu_pemesanan) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Menunggu Konfirmasi', NOW())
         ");
-        $stmt->execute([
-            $_SESSION['user_id'],
-            $grand_total,
-            $nama_pemesan,
-            $alamat_pemesan,
-            $latitude,
-            $longitude,
-            $upload['filename']
-        ]);
+        $stmt->execute([$_SESSION['user_id'], $nama_pemesan, $alamat_pemesan, $notes, $latitude, $longitude, $grand_total, $payment_proof_filename]);
         $order_id = $pdo->lastInsertId();
 
         // Create order details
@@ -186,9 +188,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                     <input type="hidden" name="alamat_pemesan" value="<?= htmlspecialchars($alamat_pemesan) ?>">
                     <input type="hidden" name="latitude" value="<?= htmlspecialchars($latitude) ?>">
                     <input type="hidden" name="longitude" value="<?= htmlspecialchars($longitude) ?>">
+                    
+                    <!-- Add notes field (hidden) -->
+                    <?php if (isset($_POST['notes'])): ?>
+                    <input type="hidden" name="notes" value="<?= htmlspecialchars($_POST['notes']) ?>">
+                    <?php endif; ?>
+                    
                     <div class="space-y-2">
                         <p><span class="text-gray-600">Nama:</span> <?= htmlspecialchars($nama_pemesan) ?></p>
                         <p><span class="text-gray-600">Alamat:</span> <?= nl2br(htmlspecialchars($alamat_pemesan)) ?></p>
+                        
+                        <!-- Display notes if available -->
+                        <?php if (isset($_POST['notes']) && !empty($_POST['notes'])): ?>
+                        <p><span class="text-gray-600">Special Instructions:</span> <?= nl2br(htmlspecialchars($_POST['notes'])) ?></p>
+                        <?php endif; ?>
                         
                         <!-- Display Map -->
                         <?php if ($latitude && $longitude): ?>

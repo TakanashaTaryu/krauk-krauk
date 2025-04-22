@@ -72,27 +72,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                         <p class="font-medium"><?= date('d M Y H:i', strtotime($order['waktu_pemesanan'])) ?></p>
                     </div>
                 </div>
-                
-                <!-- Update Status Form -->
-                <form method="POST" class="mt-4">
-                    <div class="flex flex-wrap items-center gap-4">
-                        <div class="w-full md:w-auto">
-                            <select name="status" class="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                <option value="Menunggu Konfirmasi" <?= $order['status'] === 'Menunggu Konfirmasi' ? 'selected' : '' ?>>Menunggu Konfirmasi</option>
-                                <option value="Diterima" <?= $order['status'] === 'Diterima' ? 'selected' : '' ?>>Diterima</option>
-                                <option value="Diproses" <?= $order['status'] === 'Diproses' ? 'selected' : '' ?>>Diproses</option>
-                                <option value="Diperjalanan" <?= $order['status'] === 'Diperjalanan' ? 'selected' : '' ?>>Diperjalanan</option>
-                            </select>
-                        </div>
-                        <button type="submit" 
-                                name="update_status" 
-                                class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition">
-                            Update Status
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
+
+                <!-- Customer Feedback Section - Only show when feedback exists -->
+                <?php
+        // Check if feedback exists
+        $stmt = $pdo->prepare("SELECT * FROM feedback WHERE id_pesanan = ?");
+        $stmt->execute([$order_id]);
+        $feedback = $stmt->fetch();
+        
+        if ($feedback):
+        ?>
+        <div class="lg:col-span-3">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Customer Feedback</h2>
+                <div class="mb-4">
+                    <div class="flex items-center mb-2">
+                        <div class="flex text-yellow-400">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <i class="fas fa-star <?= $i <= $feedback['rating'] ? 'text-yellow-400' : 'text-gray-300' ?>"></i>
+                            <?php endfor; ?>
+                        </div>
+                        <span class="ml-2 text-gray-600"><?= date('d M Y', strtotime($feedback['created_at'])) ?></span>
+                    </div>
+                    <?php if (!empty($feedback['komentar'])): ?>
+                        <p class="text-gray-700"><?= nl2br(htmlspecialchars($feedback['komentar'])) ?></p>
+                    <?php else: ?>
+                        <p class="text-gray-500 italic">No comments provided</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
         
         <!-- Customer Information -->
         <div class="lg:col-span-1">
@@ -103,6 +115,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                     <p><span class="text-gray-600">Phone:</span> <?= htmlspecialchars($order['no_telp']) ?></p>
                     <p><span class="text-gray-600">Recipient:</span> <?= htmlspecialchars($order['nama_pemesan']) ?></p>
                     <p><span class="text-gray-600">Address:</span> <?= nl2br(htmlspecialchars($order['alamat_pemesan'])) ?></p>
+                    
+                    <!-- Display notes if available -->
+                    <?php if (!empty($order['notes'])): ?>
+                    <div class="mt-3 p-3 bg-yellow-50 rounded-md border border-yellow-200">
+                        <p class="font-medium text-gray-700 mb-1">Special Instructions:</p>
+                        <p class="text-gray-600"><?= nl2br(htmlspecialchars($order['notes'])) ?></p>
+                    </div>
+                    <?php endif; ?>
                     
                     <!-- Display Map if coordinates are available -->
                     <?php if (!empty($order['latitude']) && !empty($order['longitude'])): ?>
@@ -159,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
         
         <!-- Order Items -->
         <div class="lg:col-span-2">
-            <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 class="text-xl font-semibold mb-4">Order Items</h2>
                 <div class="overflow-x-auto">
                     <table class="min-w-full">
@@ -206,6 +226,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                         </tbody>
                     </table>
                 </div>
+            </div>
+            
+            <!-- Update Status Form -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Update Status</h2>
+                <form method="POST" class="mt-4">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="w-full md:w-auto">
+                            <select name="status" class="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                <option value="Menunggu Konfirmasi" <?= $order['status'] === 'Menunggu Konfirmasi' ? 'selected' : '' ?>>Menunggu Konfirmasi</option>
+                                <option value="Diterima" <?= $order['status'] === 'Diterima' ? 'selected' : '' ?>>Diterima</option>
+                                <option value="Diproses" <?= $order['status'] === 'Diproses' ? 'selected' : '' ?>>Diproses</option>
+                                <option value="Diperjalanan" <?= $order['status'] === 'Diperjalanan' ? 'selected' : '' ?>>Diperjalanan</option>
+                                <option value="Telah Sampai" <?= $order['status'] === 'Telah Sampai' ? 'selected' : '' ?>>Telah Sampai</option>
+                            </select>
+                        </div>
+                        <button type="submit" 
+                                name="update_status" 
+                                class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition">
+                            Update Status
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                                 </a>
                                 <form method="POST" class="inline-block">
                                     <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                                    <input type="hidden" name="status" value="Selesai">
+                                    <input type="hidden" name="status" value="Telah Sampai">
                                     <button type="submit" name="update_status" 
                                             class="text-green-600 hover:text-green-900"
                                             onclick="return confirm('Mark this order as delivered?')">

@@ -90,7 +90,7 @@ $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $orders = $stmt->fetchAll();
 
-$status_options = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan'];
+$status_options = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan', 'Telah Sampai', 'Dibatalkan Olen Penjual', 'Gagal'];
 ?>
 
 <div class="container mx-auto px-4 py-8">
@@ -228,13 +228,28 @@ $status_options = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan'
                                         echo 'bg-yellow-100 text-yellow-800';
                                         break;
                                     case 'Diterima':
-                                        echo 'bg-green-100 text-green-800';
-                                        break;
-                                    case 'Diproses':
                                         echo 'bg-blue-100 text-blue-800';
                                         break;
-                                    case 'Diperjalanan':
+                                    case 'Diproses':
                                         echo 'bg-purple-100 text-purple-800';
+                                        break;
+                                    case 'Diperjalanan':
+                                        echo 'bg-orange-100 text-orange-800';
+                                        break;
+                                    case 'Selesai':
+                                        echo 'bg-green-100 text-green-800';
+                                        break;
+                                    case 'Dibatalkan':
+                                        echo 'bg-red-100 text-red-800';
+                                        break;
+                                    case 'Telah Sampai':
+                                        echo 'bg-green-100 text-green-800';
+                                        break;
+                                    case 'Gagal':
+                                        echo 'bg-red-100 text-red-800';
+                                        break;
+                                    case 'Dibatalkan Olen Penjual':
+                                        echo 'bg-red-100 text-red-800';
                                         break;
                                     default:
                                         echo 'bg-gray-100 text-gray-800';

@@ -201,17 +201,32 @@ $monthlyRevenue = $stmt->fetchAll();
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                     <?php
                                     switch($order['status']) {
-                                        case 'Diproses':
-                                            echo 'bg-blue-100 text-blue-800';
-                                            break;
                                         case 'Menunggu Konfirmasi':
                                             echo 'bg-yellow-100 text-yellow-800';
                                             break;
                                         case 'Diterima':
-                                            echo 'bg-green-100 text-green-800';
+                                            echo 'bg-blue-100 text-blue-800';
+                                            break;
+                                        case 'Diproses':
+                                            echo 'bg-purple-100 text-purple-800';
                                             break;
                                         case 'Diperjalanan':
-                                            echo 'bg-purple-100 text-purple-800';
+                                            echo 'bg-orange-100 text-orange-800';
+                                            break;
+                                        case 'Selesai':
+                                            echo 'bg-green-100 text-green-800';
+                                            break;
+                                        case 'Dibatalkan':
+                                            echo 'bg-red-100 text-red-800';
+                                            break;
+                                        case 'Telah Sampai':
+                                            echo 'bg-green-100 text-green-800';
+                                            break;
+                                        case 'Gagal':
+                                            echo 'bg-red-100 text-red-800';
+                                            break;
+                                        case 'Dibatalkan Olen Penjual':
+                                            echo 'bg-red-100 text-red-800';
                                             break;
                                         default:
                                             echo 'bg-gray-100 text-gray-800';
@@ -229,7 +244,7 @@ $monthlyRevenue = $stmt->fetchAll();
     </div>
     
     <!-- Quick Links -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
         <a href="manage_menu.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-bold text-gray-800">Manage Menu</h3>
@@ -252,6 +267,14 @@ $monthlyRevenue = $stmt->fetchAll();
                 <i class="fas fa-clipboard-list text-2xl text-orange-500"></i>
             </div>
             <p class="text-gray-600">View and process customer orders</p>
+        </a>
+        
+        <a href="kitchen_orders.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Kitchen Dashboard</h3>
+                <i class="fas fa-utensils text-2xl text-orange-500"></i>
+            </div>
+            <p class="text-gray-600">View and manage orders in preparation</p>
         </a>
         
         <a href="driver_orders.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">

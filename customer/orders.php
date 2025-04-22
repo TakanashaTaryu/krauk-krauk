@@ -77,7 +77,7 @@ if (!isset($order)) {
                         <!-- Order Progress Tracker -->
                         <div class="relative pt-8">
                             <?php
-                            $statuses = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan'];
+                            $statuses = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan', 'Telah Sampai'];
                             $currentStatusIndex = array_search($order['status'], $statuses);
                             ?>
                             <div class="flex justify-between mb-2">
@@ -91,7 +91,7 @@ if (!isset($order)) {
                             </div>
                             <div class="overflow-hidden h-2 mb-4 flex rounded bg-gray-200">
                                 <?php
-                                $progressWidth = ($currentStatusIndex + 1) * 25;
+                                $progressWidth = ($currentStatusIndex + 1) * 20;
                                 ?>
                                 <div style="width: <?= $progressWidth ?>%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-orange-600"></div>
                             </div>
@@ -99,7 +99,7 @@ if (!isset($order)) {
                     </div>
                 </div>
                 
-                <!-- Order Items -->
+                <!-- Order Items and Payment Summary -->
                 <div class="md:col-span-2">
                     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                         <h2 class="text-xl font-semibold mb-4">Order Items</h2>
@@ -130,7 +130,7 @@ if (!isset($order)) {
                                     <p>Tax</p>
                                     <p>Rp <?= number_format($tax, 0, ',', '.') ?></p>
                                 </div>
-                                <div class="flex justify-between items-center font-bold pt-2">
+                                <div class="flex justify-between items-center font-bold pt-2 border-t mt-2">
                                     <p>Total</p>
                                     <p>Rp <?= number_format($order['total_harga'], 0, ',', '.') ?></p>
                                 </div>
@@ -139,13 +139,46 @@ if (!isset($order)) {
                     </div>
                 </div>
                 
-                <!-- Delivery Information -->
+                <!-- Customer and Payment Information -->
                 <div class="md:col-span-1">
+                    <!-- Payment Information -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h2 class="text-xl font-semibold mb-4">Payment</h2>
+                        <div class="space-y-3">
+                            <p><span class="text-gray-600 font-medium">Total:</span> 
+                               <span class="font-bold">Rp <?= number_format($order['total_harga'], 0, ',', '.') ?></span>
+                            </p>
+                            
+                            <div class="pt-2">
+                                <?php if (!empty($order['bukti_pembayaran'])): ?>
+                                <p class="text-green-600 mb-3"><i class="fas fa-check-circle mr-1"></i> Payment Confirmed</p>
+                                <div>
+                                    <p class="text-gray-600 mb-2">Payment Proof:</p>
+                                    <img src="../assets/images/uploads/<?= htmlspecialchars($order['bukti_pembayaran']) ?>" 
+                                         alt="Payment Proof" 
+                                         class="w-full rounded-md border">
+                                </div>
+                                <?php else: ?>
+                                <p class="text-red-600"><i class="fas fa-exclamation-circle mr-1"></i> No payment proof uploaded</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Delivery Information -->
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <h2 class="text-xl font-semibold mb-4">Delivery Information</h2>
                         <div class="space-y-2">
                             <p><span class="text-gray-600">Name:</span> <?= htmlspecialchars($order['nama_pemesan']) ?></p>
                             <p><span class="text-gray-600">Address:</span> <?= nl2br(htmlspecialchars($order['alamat_pemesan'])) ?></p>
+                            
+                            <!-- Display notes if available -->
+                            <?php if (!empty($order['notes'])): ?>
+                            <div class="mt-2 p-3 bg-yellow-50 rounded-md border border-yellow-200">
+                                <p class="font-medium text-gray-700">Special Instructions:</p>
+                                <p class="text-gray-600"><?= nl2br(htmlspecialchars($order['notes'])) ?></p>
+                            </div>
+                            <?php endif; ?>
                             
                             <!-- Display Map if coordinates are available -->
                             <?php if (!empty($order['latitude']) && !empty($order['longitude'])): ?>
@@ -176,6 +209,69 @@ if (!isset($order)) {
                     </div>
                 </div>
             </div>
+            
+            <!-- Feedback Section - Only show when status is "Telah Sampai" -->
+            <?php if ($order['status'] === 'Telah Sampai'): ?>
+                <?php
+                // Check if feedback already exists
+                $stmt = $pdo->prepare("SELECT * FROM feedback WHERE id_pesanan = ?");
+                $stmt->execute([$order['id']]);
+                $feedback = $stmt->fetch();
+                ?>
+                <br>
+                <div class="md:col-span-3">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-semibold mb-4">
+                            <?= $feedback ? 'Your Feedback' : 'Rate Your Order' ?>
+                        </h2>
+                        
+                        <?php if ($feedback): ?>
+                            <!-- Display existing feedback -->
+                            <div class="mb-4">
+                                <div class="flex items-center mb-2">
+                                    <div class="flex text-yellow-400">
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <i class="fas fa-star <?= $i <= $feedback['rating'] ? 'text-yellow-400' : 'text-gray-300' ?>"></i>
+                                        <?php endfor; ?>
+                                    </div>
+                                    <span class="ml-2 text-gray-600"><?= date('d M Y', strtotime($feedback['created_at'])) ?></span>
+                                </div>
+                                <?php if (!empty($feedback['komentar'])): ?>
+                                    <p class="text-gray-700"><?= nl2br(htmlspecialchars($feedback['komentar'])) ?></p>
+                                <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <!-- Feedback Form -->
+                            <form method="POST" action="submit_feedback.php">
+                                <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                                
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 mb-2">Rating</label>
+                                    <div class="flex space-x-2">
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <div>
+                                            <input type="radio" name="rating" id="rating-<?= $i ?>" value="<?= $i ?>" class="hidden peer" <?= $i === 5 ? 'checked' : '' ?>>
+                                            <label for="rating-<?= $i ?>" class="cursor-pointer text-2xl peer-checked:text-yellow-400 text-gray-300 hover:text-yellow-400">
+                                                <i class="fas fa-star"></i>
+                                            </label>
+                                        </div>
+                                        <?php endfor; ?>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="comment" class="block text-gray-700 mb-2">Comments (Optional)</label>
+                                    <textarea id="comment" name="comment" rows="3" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Share your experience with this order..."></textarea>
+                                </div>
+                                
+                                <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition">
+                                    Submit Feedback
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     <?php else: ?>
         <!-- Orders List View -->
@@ -210,6 +306,15 @@ if (!isset($order)) {
                                         echo 'bg-green-100 text-green-800';
                                         break;
                                     case 'Dibatalkan':
+                                        echo 'bg-red-100 text-red-800';
+                                        break;
+                                    case 'Telah Sampai':
+                                        echo 'bg-green-100 text-green-800';
+                                        break;
+                                    case 'Gagal':
+                                        echo 'bg-red-100 text-red-800';
+                                        break;
+                                    case 'Dibatalkan Olen Penjual':
                                         echo 'bg-red-100 text-red-800';
                                         break;
                                     default:
@@ -248,3 +353,70 @@ if (!isset($order)) {
 </div>
 
 <?php require_once '../includes/footer.php'; ?>
+
+<!-- Add this right after the feedback form -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Star rating functionality
+    const starLabels = document.querySelectorAll('label[for^="rating-"]');
+    
+    starLabels.forEach(label => {
+        label.addEventListener('mouseover', function() {
+            const currentRating = parseInt(this.getAttribute('for').split('-')[1]);
+            
+            // Highlight stars on hover
+            starLabels.forEach((star, index) => {
+                const starNumber = index + 1;
+                if (starNumber <= currentRating) {
+                    star.classList.add('text-yellow-400');
+                    star.classList.remove('text-gray-300');
+                } else {
+                    star.classList.add('text-gray-300');
+                    star.classList.remove('text-yellow-400');
+                }
+            });
+        });
+        
+        label.addEventListener('click', function() {
+            const currentRating = parseInt(this.getAttribute('for').split('-')[1]);
+            
+            // Set the radio button
+            document.getElementById(`rating-${currentRating}`).checked = true;
+            
+            // Update visual state
+            starLabels.forEach((star, index) => {
+                const starNumber = index + 1;
+                if (starNumber <= currentRating) {
+                    star.classList.add('text-yellow-400');
+                    star.classList.remove('text-gray-300');
+                } else {
+                    star.classList.add('text-gray-300');
+                    star.classList.remove('text-yellow-400');
+                }
+            });
+        });
+    });
+    
+    // Reset stars when mouse leaves the rating area
+    const ratingContainer = document.querySelector('.flex.space-x-2');
+    if (ratingContainer) {
+        ratingContainer.addEventListener('mouseleave', function() {
+            // Find which star is selected
+            const checkedInput = document.querySelector('input[name="rating"]:checked');
+            const checkedValue = checkedInput ? parseInt(checkedInput.value) : 0;
+            
+            // Reset stars based on selection
+            starLabels.forEach((star, index) => {
+                const starNumber = index + 1;
+                if (starNumber <= checkedValue) {
+                    star.classList.add('text-yellow-400');
+                    star.classList.remove('text-gray-300');
+                } else {
+                    star.classList.add('text-gray-300');
+                    star.classList.remove('text-yellow-400');
+                }
+            });
+        });
+    }
+});
+</script>

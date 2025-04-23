@@ -293,6 +293,16 @@ $monthlyRevenue = $stmt->fetchAll();
             </div>
             <p class="text-gray-600">Configure QRIS payment settings</p>
         </a>
+        
+        <!-- Add Manage Admin link -->
+        <a href="manage_admin.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Manage Admin</h3>
+                <i class="fas fa-user-shield text-2xl text-orange-500"></i>
+            </div>
+            <p class="text-gray-600">Add, edit, or remove admin accounts</p>
+        </a>
+    </div>
 </div>
 
 <?php require_once '../includes/footer.php'; ?>

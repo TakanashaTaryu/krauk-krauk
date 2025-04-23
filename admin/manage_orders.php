@@ -168,7 +168,7 @@ $status_options = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan'
                 <p class="text-2xl font-bold text-blue-600"><?= count($orders) ?></p>
             </div>
             <?php
-            $stmt = $pdo->query("SELECT SUM(total_harga) as total FROM pesanan WHERE status = 'Diterima'");
+            $stmt = $pdo->query("SELECT SUM(total_harga) as total FROM pesanan WHERE status = 'Telah Sampai'");
             $totalRevenue = $stmt->fetch()['total'] ?? 0;
             //$total_revenue = array_sum(array_column($orders, 'total_harga'));
             $pending_orders = count(array_filter($orders, fn($o) => $o['status'] === 'Menunggu Konfirmasi'));

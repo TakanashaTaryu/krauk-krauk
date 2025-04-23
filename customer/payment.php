@@ -1,5 +1,6 @@
 <?php
 require_once '../includes/header.php';
+require_once '../includes/functions.php'; // Add this line to include functions.php
 
 if (!isLoggedIn()) {
     setAlert('error', 'Please login first');
@@ -22,6 +23,7 @@ $nama_pemesan = isset($_POST['nama_pemesan']) ? $_POST['nama_pemesan'] : '';
 $alamat_pemesan = isset($_POST['alamat_pemesan']) ? $_POST['alamat_pemesan'] : '';
 $latitude = isset($_POST['latitude']) ? $_POST['latitude'] : null;
 $longitude = isset($_POST['longitude']) ? $_POST['longitude'] : null;
+$notes = isset($_POST['notes']) ? $_POST['notes'] : '';
 
 // Store form data in session for persistence
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview_order'])) {
@@ -30,19 +32,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview_order'])) {
     $_SESSION['alamat_pemesan'] = $alamat_pemesan;
     $_SESSION['latitude'] = $latitude;
     $_SESSION['longitude'] = $longitude;
-    $_SESSION['notes'] = $_POST['notes'] ?? null;
+    $_SESSION['notes'] = $notes;
+    
+    // Store selected add-ons if they exist
+    if (isset($_POST['addons'])) {
+        $_SESSION['selected_addons'] = $_POST['addons'];
+    }
 } else if (isset($_SESSION['preview_order'])) {
     // Retrieve from session if available
     $nama_pemesan = $_SESSION['nama_pemesan'] ?? '';
     $alamat_pemesan = $_SESSION['alamat_pemesan'] ?? '';
     $latitude = $_SESSION['latitude'] ?? null;
     $longitude = $_SESSION['longitude'] ?? null;
-    $notes = $_SESSION['notes'] ?? null;
+    $notes = $_SESSION['notes'] ?? '';
 }
 
 // Get cart items for preview
 $stmt = $pdo->prepare("
-    SELECT k.*, m.nama, m.harga, m.stok 
+    SELECT k.*, m.nama, m.harga, m.stok, m.gambar 
     FROM keranjang k
     JOIN menu m ON k.id_menu = m.id
     WHERE k.id_customer = ?
@@ -55,17 +62,47 @@ if (empty($cart_items)) {
     redirect('../customer/cart.php');
 }
 
-// Calculate total
-$total = 0;
+// Get add-ons for each cart item
+$cart_addons = [];
 foreach ($cart_items as $item) {
-    $total += $item['harga'] * $item['jumlah'];
+    $stmt = $pdo->prepare("
+        SELECT ma.* 
+        FROM keranjang_add_ons ka
+        JOIN menu_add_ons ma ON ka.id_add_on = ma.id
+        WHERE ka.id_keranjang = ?
+    ");
+    $stmt->execute([$item['id']]);
+    $cart_addons[$item['id']] = $stmt->fetchAll();
+}
+
+// Calculate total
+$subtotal = 0;
+$items_with_addons = [];
+
+foreach ($cart_items as $item) {
+    $item_total = $item['harga'] * $item['jumlah'];
+    $item_addons = $cart_addons[$item['id']] ?? [];
+    
+    // Add add-ons price
+    foreach ($item_addons as $addon) {
+        $item_total += $addon['harga'] * $item['jumlah'];
+    }
+    
+    $subtotal += $item_total;
+    
+    // Store item with its add-ons for display
+    $items_with_addons[] = [
+        'item' => $item,
+        'addons' => $item_addons,
+        'subtotal' => $item_total
+    ];
 }
 
 // Add taxes
-$qris_tax = 500; // Rp. 500,00
-$app_tax = 300;  // Rp. 300,00
+$qris_tax = 500;
+$app_tax = 300;
 $tax_total = $qris_tax + $app_tax;
-$grand_total = $total + $tax_total;
+$grand_total = $subtotal + $tax_total;
 
 // Handle payment proof upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && $_FILES['payment_proof']['error'] === 0) {
@@ -77,8 +114,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
             throw new Exception('File size exceeds the 20MB limit');
         }
 
-        // Upload payment proof with compression
-        $upload = uploadImage($_FILES['payment_proof'], '../assets/images/uploads/', true);
+        // Upload payment proof
+        $upload = uploadImage($_FILES['payment_proof'], '../assets/images/uploads/');
         if (!$upload['success']) {
             throw new Exception($upload['message']);
         }
@@ -89,40 +126,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
         // Get form data
         $nama_pemesan = $_POST['nama_pemesan'];
         $alamat_pemesan = $_POST['alamat_pemesan'];
-        $notes = isset($_POST['notes']) ? trim($_POST['notes']) : null;
-        $latitude = $_POST['latitude'] ?? null;
-        $longitude = $_POST['longitude'] ?? null;
-        
-        // Create order
+        $notes = isset($_POST['notes']) ? $_POST['notes'] : '';
+        $latitude = $_POST['latitude'];
+        $longitude = $_POST['longitude'];
+        $total_harga = $grand_total;
+
+        // Create new order
         $stmt = $pdo->prepare("
-            INSERT INTO pesanan (id_customer, nama_pemesan, alamat_pemesan, notes, latitude, longitude, total_harga, bukti_pembayaran, status, waktu_pemesanan) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Menunggu Konfirmasi', NOW())
+            INSERT INTO pesanan (
+                id_customer, nama_pemesan, alamat_pemesan, 
+                latitude, longitude, total_harga, 
+                bukti_pembayaran, notes, status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Menunggu Konfirmasi')
         ");
-        $stmt->execute([$_SESSION['user_id'], $nama_pemesan, $alamat_pemesan, $notes, $latitude, $longitude, $grand_total, $payment_proof_filename]);
+        $stmt->execute([
+            $_SESSION['user_id'],
+            $nama_pemesan,
+            $alamat_pemesan,
+            $latitude,
+            $longitude,
+            $total_harga,
+            $payment_proof_filename,
+            $notes
+        ]);
+
         $order_id = $pdo->lastInsertId();
 
-        // Create order details
-        $stmt = $pdo->prepare("
-            INSERT INTO pesanan_detail (
-                id_pesanan, id_menu, jumlah, harga_satuan
-            ) VALUES (?, ?, ?, ?)
-        ");
-        
+        // Add order items
         foreach ($cart_items as $item) {
+            $stmt = $pdo->prepare("
+                INSERT INTO pesanan_detail (
+                    id_pesanan, id_menu, jumlah, harga_satuan
+                ) VALUES (?, ?, ?, ?)
+            ");
             $stmt->execute([
                 $order_id,
                 $item['id_menu'],
                 $item['jumlah'],
                 $item['harga']
             ]);
-
+            
+            $order_detail_id = $pdo->lastInsertId();
+            
+            // Add order item add-ons if any
+            if (isset($cart_addons[$item['id']]) && !empty($cart_addons[$item['id']])) {
+                foreach ($cart_addons[$item['id']] as $addon) {
+                    $stmt = $pdo->prepare("
+                        INSERT INTO pesanan_detail_add_ons (
+                            id_pesanan_detail, nama, harga
+                        ) VALUES (?, ?, ?)
+                    ");
+                    $stmt->execute([
+                        $order_detail_id,
+                        $addon['nama'],
+                        $addon['harga']
+                    ]);
+                }
+            }
+            
             // Update stock
-            $new_stock = $item['stok'] - $item['jumlah'];
-            $stmt2 = $pdo->prepare("UPDATE menu SET stok = ? WHERE id = ?");
-            $stmt2->execute([$new_stock, $item['id_menu']]);
+            $stmt = $pdo->prepare("
+                UPDATE menu 
+                SET stok = stok - ? 
+                WHERE id = ?
+            ");
+            $stmt->execute([$item['jumlah'], $item['id_menu']]);
         }
 
         // Clear cart
+        $stmt = $pdo->prepare("DELETE FROM keranjang_add_ons WHERE id_keranjang IN (SELECT id FROM keranjang WHERE id_customer = ?)");
+        $stmt->execute([$_SESSION['user_id']]);
+        
         $stmt = $pdo->prepare("DELETE FROM keranjang WHERE id_customer = ?");
         $stmt->execute([$_SESSION['user_id']]);
 
@@ -132,153 +206,180 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
         unset($_SESSION['alamat_pemesan']);
         unset($_SESSION['latitude']);
         unset($_SESSION['longitude']);
+        unset($_SESSION['notes']);
+        unset($_SESSION['selected_addons']);
 
         $pdo->commit();
-        
-        setAlert('success', 'Order placed successfully!');
-        redirect('../customer/orders.php');
 
+        setAlert('success', 'Order placed successfully! Your order is being processed.');
+        redirect('../customer/orders.php');
     } catch (Exception $e) {
         $pdo->rollBack();
-        setAlert('error', 'Failed to process order: ' . $e->getMessage());
+        setAlert('error', 'Error: ' . $e->getMessage());
     }
 }
 ?>
 
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">Review Order & Payment</h1>
+    <h1 class="text-3xl font-bold mb-8">Review Order</h1>
     
-    <div class="max-w-4xl mx-auto">
-        <form method="POST" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Order Preview -->
-            <div>
-                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
-                    <div class="space-y-4">
-                        <?php foreach ($cart_items as $item): ?>
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="font-medium"><?= htmlspecialchars($item['nama']) ?></p>
-                                <p class="text-sm text-gray-500"><?= $item['jumlah'] ?> x Rp <?= number_format($item['harga'], 0, ',', '.') ?></p>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Delivery Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <p class="text-gray-600 text-sm">Name:</p>
+                        <p class="font-medium"><?= htmlspecialchars($nama_pemesan) ?></p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Address:</p>
+                        <p class="font-medium"><?= htmlspecialchars($alamat_pemesan) ?></p>
+                    </div>
+                </div>
+                
+                <?php if (!empty($notes)): ?>
+                <div class="mb-4">
+                    <p class="text-gray-600 text-sm">Special Instructions:</p>
+                    <p class="font-medium"><?= htmlspecialchars($notes) ?></p>
+                </div>
+                <?php endif; ?>
+                
+                <div id="map" class="w-full h-64 rounded-md border"></div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                <h2 class="text-xl font-semibold p-6 pb-3">Order Items</h2>
+                
+                <div class="px-6">
+                    <?php foreach ($items_with_addons as $index => $order_item): ?>
+                    <div class="border-b py-4 <?= $index === 0 ? 'pt-0' : '' ?>">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mr-4">
+                                <img src="../assets/images/menu/<?= htmlspecialchars($order_item['item']['gambar'] ?? 'default.jpg') ?>" 
+                                     alt="<?= htmlspecialchars($order_item['item']['nama']) ?>" 
+                                     class="w-16 h-16 object-cover rounded-md">
                             </div>
-                            <p class="font-medium">Rp <?= number_format($item['harga'] * $item['jumlah'], 0, ',', '.') ?></p>
-                        </div>
-                        <?php endforeach; ?>
-                        
-                        <div class="border-t pt-4 space-y-2">
-                            <div class="flex justify-between items-center">
-                                <p>Subtotal</p>
-                                <p>Rp <?= number_format($total, 0, ',', '.') ?></p>
-                            </div>
-                            <div class="flex justify-between items-center text-sm text-gray-600">
-                                <p>QRIS Tax</p>
-                                <p>Rp <?= number_format($qris_tax, 0, ',', '.') ?></p>
-                            </div>
-                            <div class="flex justify-between items-center text-sm text-gray-600">
-                                <p>App Tax</p>
-                                <p>Rp <?= number_format($app_tax, 0, ',', '.') ?></p>
-                            </div>
-                            <div class="flex justify-between items-center font-bold pt-2">
-                                <p>Total</p>
-                                <p>Rp <?= number_format($grand_total, 0, ',', '.') ?></p>
+                            <div class="flex-grow">
+                                <div class="flex justify-between">
+                                    <h3 class="font-medium"><?= htmlspecialchars($order_item['item']['nama']) ?></h3>
+                                    <p class="font-medium">Rp <?= number_format($order_item['item']['harga'], 0, ',', '.') ?></p>
+                                </div>
+                                <p class="text-gray-600">Quantity: <?= $order_item['item']['jumlah'] ?></p>
+                                
+                                <?php if (!empty($order_item['addons'])): ?>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-600">Add-ons:</p>
+                                    <ul class="pl-4 text-sm">
+                                        <?php foreach ($order_item['addons'] as $addon): ?>
+                                        <li class="flex justify-between">
+                                            <span><?= htmlspecialchars($addon['nama']) ?></span>
+                                            <span>+Rp <?= number_format($addon['harga'], 0, ',', '.') ?></span>
+                                        </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                                <?php endif; ?>
+                                
+                                <div class="mt-2 text-right">
+                                    <p class="font-medium">Subtotal: Rp <?= number_format($order_item['subtotal'], 0, ',', '.') ?></p>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <?php endforeach; ?>
                 </div>
-
-                <!-- Delivery Information -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold mb-4">Delivery Information</h2>
-                    <input type="hidden" name="nama_pemesan" value="<?= htmlspecialchars($nama_pemesan) ?>">
-                    <input type="hidden" name="alamat_pemesan" value="<?= htmlspecialchars($alamat_pemesan) ?>">
-                    <input type="hidden" name="latitude" value="<?= htmlspecialchars($latitude) ?>">
-                    <input type="hidden" name="longitude" value="<?= htmlspecialchars($longitude) ?>">
-                    
-                    <!-- Add notes field (hidden) -->
-                    <?php if (isset($_POST['notes'])): ?>
-                    <input type="hidden" name="notes" value="<?= htmlspecialchars($_POST['notes']) ?>">
-                    <?php endif; ?>
-                    
-                    <div class="space-y-2">
-                        <p><span class="text-gray-600">Nama:</span> <?= htmlspecialchars($nama_pemesan) ?></p>
-                        <p><span class="text-gray-600">Alamat:</span> <?= nl2br(htmlspecialchars($alamat_pemesan)) ?></p>
-                        
-                        <!-- Display notes if available -->
-                        <?php if (isset($_POST['notes']) && !empty($_POST['notes'])): ?>
-                        <p><span class="text-gray-600">Special Instructions:</span> <?= nl2br(htmlspecialchars($_POST['notes'])) ?></p>
-                        <?php endif; ?>
-                        
-                        <!-- Display Map -->
-                        <?php if ($latitude && $longitude): ?>
-                        <div class="mt-3">
-                            <p class="text-gray-600 mb-2">Lokasi Pengiriman:</p>
-                            <div id="map" class="w-full h-48 rounded-md border"></div>
-                        </div>
-                        <?php endif; ?>
+            </div>
+        </div>
+        
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between">
+                        <span>Subtotal</span>
+                        <span>Rp <?= number_format($subtotal, 0, ',', '.') ?></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>QRIS Tax</span>
+                        <span>Rp <?= number_format($qris_tax, 0, ',', '.') ?></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>App Tax</span>
+                        <span>Rp <?= number_format($app_tax, 0, ',', '.') ?></span>
+                    </div>
+                    <div class="border-t pt-2 mt-2 flex justify-between font-semibold">
+                        <span>Total</span>
+                        <span>Rp <?= number_format($grand_total, 0, ',', '.') ?></span>
                     </div>
                 </div>
             </div>
-
-            <!-- Payment Section -->
+            
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-semibold mb-4">Payment</h2>
-                
-                <!-- QRIS Code -->
-                <div class="mb-6">
-                    <p class="font-medium mb-4">Scan QRIS code below to pay Rp <?= number_format($grand_total, 0, ',', '.') ?>:</p>
-                    <div class="bg-gray-100 p-4 rounded-lg flex justify-center">
-                        <div class="w-48 h-48 bg-gray-200 flex items-center justify-center">
-                            <span class="text-gray-500">QRIS Code</span>
+                <div class="mb-4">
+                    <div class="p-4 bg-gray-100 rounded-md mb-4">
+                        <p class="font-medium mb-2">QRIS Payment</p>
+                        <img src="../assets/images/qris.png" alt="QRIS Code" class="w-full max-w-xs mx-auto mb-2">
+                        <p class="text-sm text-gray-600 text-center">Scan the QR code to pay</p>
+                    </div>
+                    
+                    <form action="payment.php" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="nama_pemesan" value="<?= htmlspecialchars($nama_pemesan) ?>">
+                        <input type="hidden" name="alamat_pemesan" value="<?= htmlspecialchars($alamat_pemesan) ?>">
+                        <input type="hidden" name="latitude" value="<?= htmlspecialchars($latitude) ?>">
+                        <input type="hidden" name="longitude" value="<?= htmlspecialchars($longitude) ?>">
+                        <input type="hidden" name="notes" value="<?= htmlspecialchars($notes) ?>">
+                        
+                        <div class="mb-4">
+                            <label for="payment_proof" class="block text-sm font-medium text-gray-700 mb-1">Upload Payment Proof</label>
+                            <input type="file" 
+                                   id="payment_proof" 
+                                   name="payment_proof"
+                                   accept="image/*"
+                                   class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                   required>
+                            <p class="text-xs text-gray-500 mt-1">Upload a screenshot of your payment confirmation</p>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Payment Proof Upload -->
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Upload Payment Proof
-                        </label>
-                        <input type="file" 
-                               name="payment_proof" 
-                               accept="image/*"
-                               required
-                               class="w-full border rounded-md px-3 py-2">
-                        <p class="text-xs text-gray-500 mt-1">Maximum file size: 8MB. Image will be compressed.</p>
-                    </div>
-                    
-                    <button type="submit"
-                            class="w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition">
-                        Confirm Payment & Place Order
-                    </button>
-                    
-                    <a href="../customer/cart.php" class="block text-center text-gray-600 hover:underline">
-                        Back to Cart
-                    </a>
+                        
+                        <div class="flex space-x-4">
+                            <a href="cart.php" class="flex-1 py-2 px-4 border border-gray-300 rounded-md text-center hover:bg-gray-50 transition">
+                                Back to Cart
+                            </a>
+                            <button type="submit" class="flex-1 bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition">
+                                Complete Order
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<!-- Leaflet CSS and JS for Payment Page -->
-<?php if ($latitude && $longitude): ?>
+<!-- Leaflet CSS and JS (Open Source Maps) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const deliveryLocation = [<?= $latitude ?>, <?= $longitude ?>];
+    // Initialize map with the selected location
+    const latitude = <?= $latitude ?? 'null' ?>;
+    const longitude = <?= $longitude ?? 'null' ?>;
     
-    const map = L.map('map').setView(deliveryLocation, 15);
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-    
-    // Add marker at delivery location
-    L.marker(deliveryLocation).addTo(map);
+    if (latitude && longitude) {
+        const map = L.map('map').setView([latitude, longitude], 15);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Add marker at the delivery location
+        L.marker([latitude, longitude]).addTo(map)
+            .bindPopup('Delivery Location')
+            .openPopup();
+    }
 });
 </script>
-<?php endif; ?>
 
 <?php require_once '../includes/footer.php'; ?>

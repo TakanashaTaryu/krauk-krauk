@@ -45,6 +45,34 @@ try {
     $stmt->execute([$order_id]);
     $order_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Get add-ons for each order item
+    $items_with_addons = [];
+    foreach ($order_items as $item) {
+        $stmt = $pdo->prepare("
+            SELECT * FROM pesanan_detail_add_ons
+            WHERE id_pesanan_detail = ?
+        ");
+        $stmt->execute([$item['id']]);
+        $addons = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Calculate addon total
+        $addon_total = 0;
+        foreach ($addons as $addon) {
+            $addon_total += $addon['harga'] * $item['jumlah'];
+        }
+        
+        $items_with_addons[] = [
+            'id' => $item['id'],
+            'name' => $item['menu_name'],
+            'price' => $item['harga_satuan'],
+            'quantity' => $item['jumlah'],
+            'subtotal' => $item['harga_satuan'] * $item['jumlah'],
+            'addons' => $addons,
+            'addon_total' => $addon_total,
+            'total_with_addons' => ($item['harga_satuan'] * $item['jumlah']) + $addon_total
+        ];
+    }
+    
     // Format the response
     echo json_encode([
         'success' => true,
@@ -57,22 +85,15 @@ try {
                     'name' => $order['nama_pemesan'],
                     'address' => $order['alamat_pemesan'],
                     'latitude' => $order['latitude'],
-                    'longitude' => $order['longitude']
+                    'longitude' => $order['longitude'],
+                    'notes' => $order['notes']
                 ],
                 'status' => $order['status'],
                 'total' => $order['total_harga'],
                 'date' => $order['waktu_pemesanan'],
                 'payment_proof' => $order['bukti_pembayaran']
             ],
-            'items' => array_map(function($item) {
-                return [
-                    'id' => $item['id'],
-                    'name' => $item['menu_name'],
-                    'price' => $item['harga_satuan'],
-                    'quantity' => $item['jumlah'],
-                    'subtotal' => $item['harga_satuan'] * $item['jumlah']
-                ];
-            }, $order_items)
+            'items' => $items_with_addons
         ]
     ]);
     

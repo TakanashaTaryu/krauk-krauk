@@ -11,6 +11,7 @@ if (isAdmin()) {
     redirect('../admin/dashboard.php');
 }
 
+// Get cart items with menu details
 $stmt = $pdo->prepare("
     SELECT k.id, k.jumlah, m.id as menu_id, m.nama, m.gambar, m.harga, m.stok 
     FROM keranjang k
@@ -20,9 +21,47 @@ $stmt = $pdo->prepare("
 $stmt->execute([$_SESSION['user_id']]);
 $cart_items = $stmt->fetchAll();
 
+// Get add-ons for each menu item
+$menu_addons = [];
+foreach ($cart_items as $item) {
+    $stmt = $pdo->prepare("
+        SELECT * FROM menu_add_ons 
+        WHERE id_menu = ? 
+        ORDER BY nama
+    ");
+    $stmt->execute([$item['menu_id']]);
+    $menu_addons[$item['menu_id']] = $stmt->fetchAll();
+}
+
+// Get selected add-ons for each cart item
+$selected_addons = [];
+foreach ($cart_items as $item) {
+    $stmt = $pdo->prepare("
+        SELECT id_add_on FROM keranjang_add_ons 
+        WHERE id_keranjang = ?
+    ");
+    $stmt->execute([$item['id']]);
+    $selected_addons[$item['id']] = array_column($stmt->fetchAll(), 'id_add_on');
+}
+
+// Calculate total
 $total = 0;
 foreach ($cart_items as $item) {
-    $total += $item['harga'] * $item['jumlah'];
+    $item_total = $item['harga'] * $item['jumlah'];
+    
+    // Add selected add-ons price
+    if (isset($selected_addons[$item['id']]) && !empty($selected_addons[$item['id']])) {
+        foreach ($selected_addons[$item['id']] as $addon_id) {
+            foreach ($menu_addons[$item['menu_id']] as $addon) {
+                if ($addon['id'] == $addon_id) {
+                    $item_total += $addon['harga'] * $item['jumlah'];
+                    break;
+                }
+            }
+        }
+    }
+    
+    $total += $item_total;
 }
 ?>
 
@@ -40,6 +79,7 @@ foreach ($cart_items as $item) {
                             <th class="py-3 px-4 text-left">Menu</th>
                             <th class="py-3 px-4 text-center">Price</th>
                             <th class="py-3 px-4 text-center">Quantity</th>
+                            <th class="py-3 px-4 text-center">Add-ons</th>
                             <th class="py-3 px-4 text-center">Subtotal</th>
                             <th class="py-3 px-4 text-center">Action</th>
                         </tr>
@@ -66,8 +106,42 @@ foreach ($cart_items as $item) {
                                            onchange="updateQuantity(<?= $item['id'] ?>, this.value)">
                                 </div>
                             </td>
-                            <td class="py-4 px-4 text-center subtotal">
-                                Rp <?= number_format($item['harga'] * $item['jumlah'], 0, ',', '.') ?>
+                            <td class="py-4 px-4">
+                                <?php if (!empty($menu_addons[$item['menu_id']])): ?>
+                                <div class="flex flex-col items-start">
+                                    <?php foreach ($menu_addons[$item['menu_id']] as $addon): ?>
+                                    <div class="flex items-center mb-1">
+                                        <input type="checkbox" 
+                                               id="addon_<?= $item['id'] ?>_<?= $addon['id'] ?>" 
+                                               name="addons[<?= $item['id'] ?>][]" 
+                                               value="<?= $addon['id'] ?>"
+                                               <?= in_array($addon['id'], $selected_addons[$item['id']] ?? []) ? 'checked' : '' ?>
+                                               onchange="updateAddon(<?= $item['id'] ?>, <?= $addon['id'] ?>, this.checked)">
+                                        <label for="addon_<?= $item['id'] ?>_<?= $addon['id'] ?>" class="ml-2 text-sm">
+                                            <?= htmlspecialchars($addon['nama']) ?> (+Rp <?= number_format($addon['harga'], 0, ',', '.') ?>)
+                                        </label>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <?php else: ?>
+                                <span class="text-gray-500 text-sm">No add-ons available</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="py-4 px-4 text-center subtotal" data-item-id="<?= $item['id'] ?>">
+                                <?php
+                                $item_subtotal = $item['harga'] * $item['jumlah'];
+                                if (isset($selected_addons[$item['id']]) && !empty($selected_addons[$item['id']])) {
+                                    foreach ($selected_addons[$item['id']] as $addon_id) {
+                                        foreach ($menu_addons[$item['menu_id']] as $addon) {
+                                            if ($addon['id'] == $addon_id) {
+                                                $item_subtotal += $addon['harga'] * $item['jumlah'];
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                ?>
+                                Rp <?= number_format($item_subtotal, 0, ',', '.') ?>
                             </td>
                             <td class="py-4 px-4 text-center">
                                 <button type="button"
@@ -104,6 +178,29 @@ foreach ($cart_items as $item) {
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
+                    
+                    <!-- Add-ons section for mobile -->
+                    <?php if (!empty($menu_addons[$item['menu_id']])): ?>
+                    <div class="mb-3">
+                        <h4 class="font-medium text-sm mb-1">Add-ons:</h4>
+                        <div class="pl-2">
+                            <?php foreach ($menu_addons[$item['menu_id']] as $addon): ?>
+                            <div class="flex items-center mb-1">
+                                <input type="checkbox" 
+                                       id="mobile_addon_<?= $item['id'] ?>_<?= $addon['id'] ?>" 
+                                       name="addons[<?= $item['id'] ?>][]" 
+                                       value="<?= $addon['id'] ?>"
+                                       <?= in_array($addon['id'], $selected_addons[$item['id']] ?? []) ? 'checked' : '' ?>
+                                       onchange="updateAddon(<?= $item['id'] ?>, <?= $addon['id'] ?>, this.checked)">
+                                <label for="mobile_addon_<?= $item['id'] ?>_<?= $addon['id'] ?>" class="ml-2 text-sm">
+                                    <?= htmlspecialchars($addon['nama']) ?> (+Rp <?= number_format($addon['harga'], 0, ',', '.') ?>)
+                                </label>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <label class="mr-2 text-sm text-gray-600">Quantity:</label>
@@ -114,8 +211,21 @@ foreach ($cart_items as $item) {
                                    class="w-16 px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                                    onchange="updateQuantity(<?= $item['id'] ?>, this.value)">
                         </div>
-                        <div class="subtotal font-medium">
-                            Rp <?= number_format($item['harga'] * $item['jumlah'], 0, ',', '.') ?>
+                        <div class="subtotal font-medium" data-item-id="<?= $item['id'] ?>">
+                            <?php
+                            $item_subtotal = $item['harga'] * $item['jumlah'];
+                            if (isset($selected_addons[$item['id']]) && !empty($selected_addons[$item['id']])) {
+                                foreach ($selected_addons[$item['id']] as $addon_id) {
+                                    foreach ($menu_addons[$item['menu_id']] as $addon) {
+                                        if ($addon['id'] == $addon_id) {
+                                            $item_subtotal += $addon['harga'] * $item['jumlah'];
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            ?>
+                            Rp <?= number_format($item_subtotal, 0, ',', '.') ?>
                         </div>
                     </div>
                 </div>
@@ -221,46 +331,30 @@ function removeItem(cartId) {
                     'Accept': 'application/json'
                 }
             })
-            .then(response => {
-                // Check if the response is JSON before parsing
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    return response.json();
-                } else {
-                    // If not JSON, handle as error
-                    throw new Error('Server returned an invalid response. Please try again later.');
-                }
-            })
+            .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const row = document.querySelector(`tr[data-cart-id="${cartId}"]`);
-                    const mobileCard = document.querySelector(`div[data-cart-id="${cartId}"]`);
+                    // Remove item from DOM
+                    document.querySelectorAll(`[data-cart-id="${cartId}"]`).forEach(el => {
+                        el.remove();
+                    });
                     
-                    if (row) {
-                        row.style.opacity = '0';
-                        setTimeout(() => {
-                            row.remove();
-                            updateCartDisplay(data);
-                        }, 300);
+                    // Update cart count and total
+                    updateCartCountAndTotal(data.count, data.total);
+                    
+                    // If cart is empty, reload page to show empty cart message
+                    if (data.count === 0) {
+                        location.reload();
                     }
                     
-                    if (mobileCard) {
-                        mobileCard.style.opacity = '0';
-                        setTimeout(() => {
-                            mobileCard.remove();
-                            updateCartDisplay(data);
-                        }, 300);
-                    }
+                    Swal.fire('Removed!', data.message, 'success');
                 } else {
-                    throw new Error(data.message || 'Failed to remove item');
+                    Swal.fire('Error!', data.message, 'error');
                 }
             })
             .catch(error => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.message
-                });
+                console.error('Error:', error);
+                Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
             });
         }
     });
@@ -273,52 +367,68 @@ function updateQuantity(cartId, quantity) {
             'Accept': 'application/json'
         }
     })
-    .then(response => {
-        // Check if the response is JSON before parsing
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            return response.json();
-        } else {
-            // If not JSON, handle as error
-            throw new Error('Server returned an invalid response. Please try again later.');
-        }
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Update the subtotal for this item
-            const rows = document.querySelectorAll(`[data-cart-id="${cartId}"]`);
-            rows.forEach(row => {
-                const subtotalElement = row.querySelector('.subtotal');
-                if (subtotalElement) {
-                    subtotalElement.textContent = `Rp ${formatNumber(data.item_subtotal)}`;
-                }
+            // Update subtotal display
+            document.querySelectorAll(`.subtotal[data-item-id="${cartId}"]`).forEach(el => {
+                el.textContent = 'Rp ' + formatNumber(data.item_subtotal);
             });
             
-            // Update the total price
-            updateCartDisplay(data);
+            // Update cart count and total
+            updateCartCountAndTotal(data.count, data.total);
         } else {
-            throw new Error(data.message || 'Failed to update quantity');
+            Swal.fire('Error!', data.message, 'error');
+            // Reset to previous quantity
+            location.reload();
         }
     })
     .catch(error => {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message
-        });
+        console.error('Error:', error);
+        Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
     });
 }
 
-function updateCartDisplay(data) {
-    // Update total price
-    const totalElements = document.querySelectorAll('.total-price');
-    totalElements.forEach(el => {
-        el.textContent = `Rp ${formatNumber(data.total)}`;
+function updateAddon(cartId, addonId, checked) {
+    fetch(`cart_actions.php?action=update_addon&id=${cartId}&addon_id=${addonId}&checked=${checked ? 1 : 0}`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update subtotal display
+            document.querySelectorAll(`.subtotal[data-item-id="${cartId}"]`).forEach(el => {
+                el.textContent = 'Rp ' + formatNumber(data.item_subtotal);
+            });
+            
+            // Update cart count and total
+            updateCartCountAndTotal(data.count, data.total);
+        } else {
+            Swal.fire('Error!', data.message, 'error');
+            // Reset checkbox state
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
     });
+}
+
+function updateCartCountAndTotal(count, total) {
+    // Update cart count in navbar
+    const cartCountElement = document.getElementById('cartCount');
+    if (cartCountElement) {
+        cartCountElement.textContent = count;
+    }
     
-    // If cart is empty, reload the page to show empty cart message
-    if (data.count === 0) {
-        location.reload();
+    // Update total price
+    const totalPriceElement = document.querySelector('.total-price');
+    if (totalPriceElement) {
+        totalPriceElement.textContent = 'Rp ' + formatNumber(total);
     }
 }
 
@@ -326,119 +436,48 @@ function formatNumber(number) {
     return new Intl.NumberFormat('id-ID').format(number);
 }
 
+// Initialize map
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize map if cart has items
-    if (document.getElementById('map')) {
-        // Default location (Indonesia)
-        let defaultLat = -6.200000;
-        let defaultLng = 106.816666;
-        let map = L.map('map').setView([defaultLat, defaultLng], 13);
-        let marker;
-        
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-        
-        // Try to get user's current location
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    
-                    map.setView([userLat, userLng], 15);
-                    
-                    // Place marker at user's location
-                    if (marker) {
-                        marker.setLatLng([userLat, userLng]);
-                    } else {
-                        marker = L.marker([userLat, userLng], {draggable: true}).addTo(map);
-                        
-                        // Update hidden inputs when marker is dragged
-                        marker.on('dragend', function(e) {
-                            document.getElementById('latitude').value = marker.getLatLng().lat;
-                            document.getElementById('longitude').value = marker.getLatLng().lng;
-                        });
-                    }
-                    
-                    // Set initial values for hidden inputs
-                    document.getElementById('latitude').value = userLat;
-                    document.getElementById('longitude').value = userLng;
-                },
-                function(error) {
-                    // If geolocation fails, use default location
-                    placeDefaultMarker();
-                    console.log("Geolocation error:", error.message);
-                }
-            );
-        } else {
-            // Browser doesn't support geolocation
-            placeDefaultMarker();
-            console.log("Geolocation not supported by this browser");
-        }
-        
-        // Function to place marker at default location
-        function placeDefaultMarker() {
-            marker = L.marker([defaultLat, defaultLng], {draggable: true}).addTo(map);
+    // Default to a central location in Indonesia if no coordinates are provided
+    const map = L.map('map').setView([-6.2088, 106.8456], 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Add a draggable marker
+    const marker = L.marker([-6.2088, 106.8456], {
+        draggable: true
+    }).addTo(map);
+    
+    // Update hidden inputs when marker is moved
+    marker.on('dragend', function(event) {
+        const position = marker.getLatLng();
+        document.getElementById('latitude').value = position.lat;
+        document.getElementById('longitude').value = position.lng;
+    });
+    
+    // Set initial values
+    document.getElementById('latitude').value = -6.2088;
+    document.getElementById('longitude').value = 106.8456;
+    
+    // Try to get user's location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
             
-            // Update hidden inputs when marker is dragged
-            marker.on('dragend', function(e) {
-                document.getElementById('latitude').value = marker.getLatLng().lat;
-                document.getElementById('longitude').value = marker.getLatLng().lng;
-            });
-            
-            // Set initial values for hidden inputs
-            document.getElementById('latitude').value = defaultLat;
-            document.getElementById('longitude').value = defaultLng;
-        }
-        
-        // Allow clicking on map to move marker
-        map.on('click', function(e) {
-            const clickLat = e.latlng.lat;
-            const clickLng = e.latlng.lng;
-            
-            if (marker) {
-                marker.setLatLng([clickLat, clickLng]);
-            } else {
-                marker = L.marker([clickLat, clickLng], {draggable: true}).addTo(map);
-                
-                // Update hidden inputs when marker is dragged
-                marker.on('dragend', function(e) {
-                    document.getElementById('latitude').value = marker.getLatLng().lat;
-                    document.getElementById('longitude').value = marker.getLatLng().lng;
-                });
-            }
+            // Update map and marker
+            map.setView([lat, lng], 15);
+            marker.setLatLng([lat, lng]);
             
             // Update hidden inputs
-            document.getElementById('latitude').value = clickLat;
-            document.getElementById('longitude').value = clickLng;
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+        }, function(error) {
+            console.log('Error getting location:', error.message);
         });
     }
-    
-    // Form validation
-    document.getElementById('checkoutForm')?.addEventListener('submit', function(e) {
-        const nama = document.getElementById('nama_pemesan').value.trim();
-        const alamat = document.getElementById('alamat_pemesan').value.trim();
-        const latitude = document.getElementById('latitude').value.trim();
-        const longitude = document.getElementById('longitude').value.trim();
-        
-        if (!nama || !alamat) {
-            e.preventDefault();
-            Swal.fire({
-                icon: 'error',
-                title: 'Data Tidak Lengkap',
-                text: 'Mohon isi nama dan alamat pengiriman'
-            });
-        } else if (!latitude || !longitude) {
-            e.preventDefault();
-            Swal.fire({
-                icon: 'error',
-                title: 'Lokasi Diperlukan',
-                text: 'Mohon tentukan lokasi Anda pada peta'
-            });
-        }
-    });
 });
 </script>
 

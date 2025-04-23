@@ -30,6 +30,17 @@ if (isset($_GET['id'])) {
         ");
         $stmt->execute([$order_id]);
         $order_items = $stmt->fetchAll();
+        
+        // Get add-ons for each order item
+        $order_addons = [];
+        foreach ($order_items as $item) {
+            $stmt = $pdo->prepare("
+                SELECT * FROM pesanan_detail_add_ons
+                WHERE id_pesanan_detail = ?
+            ");
+            $stmt->execute([$item['id']]);
+            $order_addons[$item['id']] = $stmt->fetchAll();
+        }
     }
 }
 
@@ -167,12 +178,35 @@ if (!isset($order)) {
                         <h2 class="text-xl font-semibold mb-4">Order Items</h2>
                         <div class="space-y-4">
                             <?php foreach ($order_items as $item): ?>
-                            <div class="flex justify-between items-center border-b pb-4">
-                                <div>
-                                    <p class="font-medium"><?= htmlspecialchars($item['menu_name']) ?></p>
-                                    <p class="text-sm text-gray-500"><?= $item['jumlah'] ?> x Rp <?= number_format($item['harga_satuan'], 0, ',', '.') ?></p>
+                            <div class="border-b pb-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <p class="font-medium"><?= htmlspecialchars($item['menu_name']) ?></p>
+                                        <p class="text-sm text-gray-500"><?= $item['jumlah'] ?> x Rp <?= number_format($item['harga_satuan'], 0, ',', '.') ?></p>
+                                    </div>
+                                    <p class="font-medium">Rp <?= number_format($item['jumlah'] * $item['harga_satuan'], 0, ',', '.') ?></p>
                                 </div>
-                                <p class="font-medium">Rp <?= number_format($item['jumlah'] * $item['harga_satuan'], 0, ',', '.') ?></p>
+                                
+                                <?php if (isset($order_addons[$item['id']]) && !empty($order_addons[$item['id']])): ?>
+                                <div class="ml-4 mt-2">
+                                    <p class="text-sm text-gray-600">Add-ons:</p>
+                                    <ul class="pl-2 text-sm">
+                                        <?php 
+                                        $addon_total = 0;
+                                        foreach ($order_addons[$item['id']] as $addon): 
+                                            $addon_total += $addon['harga'] * $item['jumlah'];
+                                        ?>
+                                        <li class="flex justify-between">
+                                            <span><?= htmlspecialchars($addon['nama']) ?></span>
+                                            <span>+Rp <?= number_format($addon['harga'], 0, ',', '.') ?></span>
+                                        </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                    <div class="text-right text-sm mt-1">
+                                        <span class="font-medium">Add-ons subtotal: Rp <?= number_format($addon_total, 0, ',', '.') ?></span>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
                             </div>
                             <?php endforeach; ?>
                             
@@ -181,12 +215,21 @@ if (!isset($order)) {
                                     <p>Subtotal</p>
                                     <?php
                                     $subtotal = 0;
+                                    $addon_total_all = 0;
                                     foreach ($order_items as $item) {
                                         $subtotal += $item['jumlah'] * $item['harga_satuan'];
+                                        
+                                        // Add add-ons price to subtotal
+                                        if (isset($order_addons[$item['id']])) {
+                                            foreach ($order_addons[$item['id']] as $addon) {
+                                                $addon_total_all += $addon['harga'] * $item['jumlah'];
+                                            }
+                                        }
                                     }
-                                    $tax = $order['total_harga'] - $subtotal;
+                                    $items_total = $subtotal + $addon_total_all;
+                                    $tax = $order['total_harga'] - $items_total;
                                     ?>
-                                    <p>Rp <?= number_format($subtotal, 0, ',', '.') ?></p>
+                                    <p>Rp <?= number_format($items_total, 0, ',', '.') ?></p>
                                 </div>
                                 <div class="flex justify-between items-center text-sm text-gray-600">
                                     <p>Tax</p>

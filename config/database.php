@@ -65,29 +65,3 @@ function getAlert() {
     }
     return null;
 }
-
-// Fungsi untuk upload gambar
-function uploadImage($file, $directory) {
-    $target_dir = $directory;
-    $file_extension = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
-    $new_filename = uniqid() . '.' . $file_extension;
-    $target_file = $target_dir . $new_filename;
-    
-    // Cek ekstensi file
-    $allowed_extensions = ["jpg", "jpeg", "png", "gif"];
-    if (!in_array($file_extension, $allowed_extensions)) {
-        return ["success" => false, "message" => "Format file tidak diizinkan. Gunakan JPG, JPEG, PNG, atau GIF."];
-    }
-    
-    // Cek ukuran file (max 5MB)
-    if ($file["size"] > 5000000) {
-        return ["success" => false, "message" => "Ukuran file terlalu besar. Maksimal 5MB."];
-    }
-    
-    // Upload file
-    if (move_uploaded_file($file["tmp_name"], $target_file)) {
-        return ["success" => true, "filename" => $new_filename];
-    } else {
-        return ["success" => false, "message" => "Gagal mengupload file."];
-    }
-}

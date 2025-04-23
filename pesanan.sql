@@ -227,3 +227,35 @@ CREATE TABLE `chat_messages` (
   CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`id_conversation`) REFERENCES `chat_conversations` (`id`) ON DELETE CASCADE,
   CONSTRAINT `chat_messages_ibfk_2` FOREIGN KEY (`sender_id`) REFERENCES `akun` (`id`) ON DELETE CASCADE
 );
+
+-- Add-ons tables
+CREATE TABLE `menu_add_ons` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `id_menu` int NOT NULL,
+  `nama` varchar(255) NOT NULL,
+  `harga` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_menu` (`id_menu`),
+  CONSTRAINT `menu_add_ons_ibfk_1` FOREIGN KEY (`id_menu`) REFERENCES `menu` (`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE `keranjang_add_ons` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `id_keranjang` int NOT NULL,
+  `id_add_on` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_keranjang` (`id_keranjang`),
+  KEY `id_add_on` (`id_add_on`),
+  CONSTRAINT `keranjang_add_ons_ibfk_1` FOREIGN KEY (`id_keranjang`) REFERENCES `keranjang` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `keranjang_add_ons_ibfk_2` FOREIGN KEY (`id_add_on`) REFERENCES `menu_add_ons` (`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE `pesanan_detail_add_ons` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `id_pesanan_detail` int NOT NULL,
+  `nama` varchar(255) NOT NULL,
+  `harga` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_pesanan_detail` (`id_pesanan_detail`),
+  CONSTRAINT `pesanan_detail_add_ons_ibfk_1` FOREIGN KEY (`id_pesanan_detail`) REFERENCES `pesanan_detail` (`id`) ON DELETE CASCADE
+);

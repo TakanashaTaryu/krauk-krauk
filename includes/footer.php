@@ -14,8 +14,7 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-semibold mb-2">Kontak</h3>
-                    <p><i class="fas fa-envelope mr-2"></i> info@Krauk-Krauk.com</p>
-                    <p><i class="fas fa-phone mr-2"></i> +62 123 4567 890</p>
+                    <p><i class="fa-brands fa-instagram mr-2"></i>@krauk-krauk</p>
                 </div>
             </div>
             <div class="border-t border-gray-700 mt-6 pt-4 text-center">

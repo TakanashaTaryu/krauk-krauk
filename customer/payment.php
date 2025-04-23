@@ -317,40 +317,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
             
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-semibold mb-4">Payment</h2>
-                <div class="mb-4">
-                    <div class="p-4 bg-gray-100 rounded-md mb-4">
-                        <p class="font-medium mb-2">QRIS Payment</p>
-                        <img src="../assets/images/qris.png" alt="QRIS Code" class="w-full max-w-xs mx-auto mb-2">
-                        <p class="text-sm text-gray-600 text-center">Scan the QR code to pay</p>
+                
+                <!-- Pre-order Notice -->
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded-md">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">Pre-Order Information</h3>
+                            <div class="mt-1 text-sm text-blue-700">
+                                <p>Your order will be processed within 1-3 days after payment confirmation.</p>
+                            </div>
+                        </div>
                     </div>
                     
-                    <form action="payment.php" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="nama_pemesan" value="<?= htmlspecialchars($nama_pemesan) ?>">
-                        <input type="hidden" name="alamat_pemesan" value="<?= htmlspecialchars($alamat_pemesan) ?>">
-                        <input type="hidden" name="latitude" value="<?= htmlspecialchars($latitude) ?>">
-                        <input type="hidden" name="longitude" value="<?= htmlspecialchars($longitude) ?>">
-                        <input type="hidden" name="notes" value="<?= htmlspecialchars($notes) ?>">
-                        
-                        <div class="mb-4">
-                            <label for="payment_proof" class="block text-sm font-medium text-gray-700 mb-1">Upload Payment Proof</label>
-                            <input type="file" 
-                                   id="payment_proof" 
-                                   name="payment_proof"
-                                   accept="image/*"
-                                   class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                   required>
-                            <p class="text-xs text-gray-500 mt-1">Upload a screenshot of your payment confirmation</p>
+                    <div class="mb-4">
+                        <!-- Add QRIS container and image elements -->
+                        <div class="p-4 bg-gray-100 rounded-md mb-4">
+                            <p class="font-medium mb-2">QRIS Payment</p>
+                            <div id="qris-container" class="flex justify-center mb-2">
+                                <div class="text-center">
+                                    <div class="inline-block p-2 bg-white rounded-lg">
+                                        <img id="qris-image" src="../assets/images/loading.gif" alt="QRIS Code" class="w-full max-w-xs mx-auto">
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-2">Total: Rp <?= number_format($grand_total, 0, ',', '.') ?></p>
+                                    <p class="text-sm text-gray-600">Scan the QR code to pay</p>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="flex space-x-4">
-                            <a href="cart.php" class="flex-1 py-2 px-4 border border-gray-300 rounded-md text-center hover:bg-gray-50 transition">
-                                Back to Cart
-                            </a>
-                            <button type="submit" class="flex-1 bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition">
-                                Complete Order
-                            </button>
-                        </div>
-                    </form>
+                        <form action="payment.php" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="nama_pemesan" value="<?= htmlspecialchars($nama_pemesan) ?>">
+                            <input type="hidden" name="alamat_pemesan" value="<?= htmlspecialchars($alamat_pemesan) ?>">
+                            <input type="hidden" name="latitude" value="<?= htmlspecialchars($latitude) ?>">
+                            <input type="hidden" name="longitude" value="<?= htmlspecialchars($longitude) ?>">
+                            <input type="hidden" name="notes" value="<?= htmlspecialchars($notes) ?>">
+                            
+                            <div class="mb-4">
+                                <label for="payment_proof" class="block text-sm font-medium text-gray-700 mb-1">Upload Payment Proof</label>
+                                <input type="file" 
+                                       id="payment_proof" 
+                                       name="payment_proof"
+                                       accept="image/*"
+                                       class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                       required>
+                                <p class="text-xs text-gray-500 mt-1">Upload a screenshot of your payment confirmation</p>
+                            </div>
+                            
+                            <div class="flex space-x-4">
+                                <a href="cart.php" class="flex-1 py-2 px-4 border border-gray-300 rounded-md text-center hover:bg-gray-50 transition">
+                                    Back to Cart
+                                </a>
+                                <button type="submit" class="flex-1 bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition">
+                                    Complete Order
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -360,6 +384,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
 <!-- Leaflet CSS and JS (Open Source Maps) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- QR Code Generator Library -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -378,6 +404,55 @@ document.addEventListener('DOMContentLoaded', function() {
         L.marker([latitude, longitude]).addTo(map)
             .bindPopup('Delivery Location')
             .openPopup();
+    } // Added missing closing bracket here
+    
+    // Generate dynamic QRIS code
+    const grandTotal = <?= $grand_total ?>;
+    const qrisContainer = document.getElementById('qris-container');
+    const qrisImage = document.getElementById('qris-image');
+    
+    if (qrisContainer && qrisImage) {
+        // Fetch dynamic QRIS from server
+        fetch('../includes/generate_dynamic_qris.php?amount=' + grandTotal)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Generate QR code directly with QRCode.js
+                    try {
+                        const qr = qrcode(0, 'M');
+                        qr.addData(data.qris_code);
+                        qr.make();
+                        
+                        // Create image
+                        qrisImage.src = qr.createDataURL(10, 0);
+                    } catch (error) {
+                        console.error('Error generating QR code:', error);
+                        // Fallback to QR Server API
+                        qrisImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(data.qris_code);
+                    }
+                } else {
+                    qrisContainer.innerHTML = `
+                        <div class="text-center p-4">
+                            <p class="text-red-500">${data.message || 'Failed to generate QRIS code'}</p>
+                            <p class="mt-2">Please contact admin or try another payment method.</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error generating QRIS:', error);
+                qrisContainer.innerHTML = `
+                    <div class="text-center p-4">
+                        <p class="text-red-500">Failed to generate QRIS code</p>
+                        <p class="mt-2">Please contact admin or try another payment method.</p>
+                    </div>
+                `;
+            });
     }
 });
 </script>

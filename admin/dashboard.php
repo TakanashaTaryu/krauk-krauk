@@ -284,7 +284,15 @@ $monthlyRevenue = $stmt->fetchAll();
             </div>
             <p class="text-gray-600">View and manage deliveries in transit</p>
         </a>
-    </div>
+        
+        <!-- Add this to the Quick Links section in dashboard.php -->
+        <a href="manage_qris.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Manage QRIS</h3>
+                <i class="fas fa-qrcode text-2xl text-orange-500"></i>
+            </div>
+            <p class="text-gray-600">Configure QRIS payment settings</p>
+        </a>
 </div>
 
 <?php require_once '../includes/footer.php'; ?>

@@ -66,7 +66,22 @@ foreach ($cart_items as $item) {
 ?>
 
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">Shopping Cart</h1>
+    <h1 class="text-3xl font-bold mb-6">Your Cart</h1>
+    
+    <!-- Pre-order Notice -->
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-md">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-500"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800">Pre-Order Information</h3>
+                <div class="mt-1 text-sm text-blue-700">
+                    <p>All items are made to order and will be processed within 1-3 days after payment confirmation.</p>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <?php if (count($cart_items) > 0): ?>
     <form id="checkoutForm" action="payment.php" method="POST" class="grid grid-cols-1 lg:grid-cols-3 gap-8">

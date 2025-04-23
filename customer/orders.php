@@ -85,6 +85,23 @@ if (!isset($order)) {
                             </div>
                         </div>
                         
+                        <!-- Pre-order Notice -->
+                        <?php if ($order['status'] == 'Menunggu Konfirmasi' || $order['status'] == 'Diterima'): ?>
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mt-4 mb-4 rounded-md">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-info-circle text-blue-500"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-blue-800">Pre-Order Information</h3>
+                                    <div class="mt-1 text-sm text-blue-700">
+                                        <p>Your order will be processed within 1-3 days after payment confirmation.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        
                         <!-- Order Progress Tracker -->
                         <div class="relative pt-8">
                             <?php

@@ -1,7 +1,19 @@
 DirectoryIndex index.php
 Options -Indexes
 
-# Custom error pages
+# Ensure all non-existent files/directories trigger the error handler
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Check if the requested file or directory doesn't exist
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Redirect to the 404 error page
+    RewriteRule ^(.*)$ /404.php [L,QSA]
+</IfModule>
+
+# Custom error pages (fallback if mod_rewrite isn't available)
 ErrorDocument 400 /error.php?code=400
 ErrorDocument 401 /error.php?code=401
 ErrorDocument 403 /403.php

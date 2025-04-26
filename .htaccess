@@ -10,7 +10,7 @@ Options -Indexes
     RewriteCond %{REQUEST_FILENAME} !-d
     
     # Redirect to the 404 error page
-    RewriteRule ^(.*)$ /404.php [L,QSA]
+    RewriteRule ^(.*)$ /errors/404.php [L,QSA]
 </IfModule>
 
 # Custom error pages (fallback if mod_rewrite isn't available)

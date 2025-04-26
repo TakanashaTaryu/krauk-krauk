@@ -397,7 +397,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                         <div class="ml-3">
                             <h3 class="text-sm font-medium text-blue-800">Pre-Order Information</h3>
                             <div class="mt-1 text-sm text-blue-700">
-                                <p>Your order will be processed within 1-3 days after payment confirmation.</p>
+                                <p>Your order will be collected from 27-28 April (Pre Order) and will be send on 29 April </p>
                             </div>
                         </div>
                     </div>

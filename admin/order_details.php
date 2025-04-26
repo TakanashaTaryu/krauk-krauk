@@ -385,3 +385,23 @@ document.addEventListener('DOMContentLoaded', function() {
     <?php endif; ?>
 });
 </script>
+
+<!-- Add this to the order details section -->
+<?php if (isset($order['payment_method_id']) && $order['payment_method_id']): ?>
+    <?php
+    $stmt = $pdo->prepare("SELECT * FROM payment_methods WHERE id = ?");
+    $stmt->execute([$order['payment_method_id']]);
+    $payment_method = $stmt->fetch();
+    ?>
+    <div class="mb-4">
+        <h3 class="text-sm font-medium text-gray-500">Payment Method</h3>
+        <div class="mt-1 flex items-center">
+            <?php if ($payment_method && isset($payment_method['logo']) && $payment_method['logo']): ?>
+                <img src="../assets/images/payment/<?= htmlspecialchars($payment_method['logo']) ?>" alt="<?= htmlspecialchars($payment_method['name']) ?>" class="h-6 w-auto mr-2">
+            <?php endif; ?>
+            <p class="text-sm text-gray-900">
+                <?= $payment_method ? htmlspecialchars($payment_method['name']) . ' - ' . htmlspecialchars($payment_method['account_number']) : 'Not specified' ?>
+            </p>
+        </div>
+    </div>
+<?php endif; ?>

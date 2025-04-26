@@ -104,7 +104,7 @@ $app_tax = 300;
 $tax_total = $qris_tax + $app_tax;
 $grand_total = $subtotal + $tax_total;
 
-// Handle payment proof upload
+// Handle payment proof upload - Update this section
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && $_FILES['payment_proof']['error'] === 0) {
     try {
         $pdo->beginTransaction();
@@ -129,15 +129,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
         $notes = isset($_POST['notes']) ? $_POST['notes'] : '';
         $latitude = $_POST['latitude'];
         $longitude = $_POST['longitude'];
-        $total_harga = $grand_total;
+        $payment_method_id = $_POST['payment_method_id'];
+        
+        // Check if payment method is QRIS
+        $stmt = $pdo->prepare("SELECT name FROM payment_methods WHERE id = ?");
+        $stmt->execute([$payment_method_id]);
+        $payment_method = $stmt->fetch();
+        $is_qris = $payment_method && strtolower($payment_method['name']) === 'qris';
+        
+        // Adjust total price based on payment method
+        $total_harga = $is_qris ? $grand_total : ($grand_total - $qris_tax);
 
         // Create new order
         $stmt = $pdo->prepare("
             INSERT INTO pesanan (
                 id_customer, nama_pemesan, alamat_pemesan, 
                 latitude, longitude, total_harga, 
-                bukti_pembayaran, notes, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Menunggu Konfirmasi')
+                bukti_pembayaran, notes, status, payment_method_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Menunggu Konfirmasi', ?)
         ");
         $stmt->execute([
             $_SESSION['user_id'],
@@ -147,7 +156,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
             $longitude,
             $total_harga,
             $payment_proof_filename,
-            $notes
+            $notes,
+            $payment_method_id
         ]);
 
         $order_id = $pdo->lastInsertId();
@@ -225,6 +235,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
     
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2">
+            <!-- Payment Method Selection - Moved to top -->
+            <!-- Replace the payment method section with this updated version -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Payment Method</h2>
+                
+                <?php
+                // Get active payment methods
+                $stmt = $pdo->query("SELECT * FROM payment_methods WHERE is_active = 1 ORDER BY name");
+                $payment_methods = $stmt->fetchAll();
+                
+                if (empty($payment_methods)) {
+                    echo '<p class="text-gray-500">No payment methods available. Please contact administrator.</p>';
+                } else {
+                ?>
+                <div class="space-y-3">
+                    <?php foreach ($payment_methods as $index => $method): ?>
+                    <div class="border rounded-md p-3 hover:border-orange-500 transition-colors <?= $index === 0 ? 'border-orange-500 bg-orange-50' : '' ?>" 
+                         data-payment-method="<?= htmlspecialchars($method['name']) ?>"
+                         onclick="document.querySelector('#payment-radio-<?= $method['id'] ?>').click()">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" 
+                                   id="payment-radio-<?= $method['id'] ?>" 
+                                   name="payment_method_id" 
+                                   value="<?= $method['id'] ?>" 
+                                   class="payment-method-radio" 
+                                   <?= $index === 0 ? 'checked' : '' ?>>
+                            <div class="flex items-center w-full">
+                                <div class="flex-shrink-0 mr-3">
+                                    <?php if (!empty($method['logo'])): ?>
+                                    <img src="../assets/images/payment/<?= htmlspecialchars($method['logo']) ?>" alt="<?= htmlspecialchars($method['name']) ?>" class="h-8 w-auto">
+                                    <?php else: ?>
+                                    <div class="bg-gray-200 h-8 w-8 flex items-center justify-center rounded">
+                                        <i class="fas fa-credit-card text-gray-500"></i>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="flex-grow">
+                                    <p class="font-medium"><?= htmlspecialchars($method['name']) ?></p>
+                                    <p class="text-sm text-gray-600"><?= htmlspecialchars($method['account_number']) ?> (<?= htmlspecialchars($method['account_name']) ?>)</p>
+                                    <?php if (!empty($method['description'])): ?>
+                                    <p class="text-xs text-gray-500"><?= htmlspecialchars($method['description']) ?></p>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="flex-shrink-0 ml-3">
+                                    <div class="w-5 h-5 border-2 rounded-full flex items-center justify-center payment-method-indicator <?= $index === 0 ? 'border-orange-500' : 'border-gray-300' ?>">
+                                        <div class="w-3 h-3 rounded-full <?= $index === 0 ? 'bg-orange-500' : '' ?>"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php } ?>
+            </div>
+            
+            <!-- Delivery Information -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 class="text-xl font-semibold mb-4">Delivery Information</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -248,6 +315,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                 <div id="map" class="w-full h-64 rounded-md border"></div>
             </div>
             
+            <!-- Order Items -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                 <h2 class="text-xl font-semibold p-6 pb-3">Order Items</h2>
                 
@@ -293,6 +361,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
         </div>
         
         <div class="lg:col-span-1">
+            <!-- Order Summary -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
                 <div class="space-y-2 mb-4">
@@ -300,7 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                         <span>Subtotal</span>
                         <span>Rp <?= number_format($subtotal, 0, ',', '.') ?></span>
                     </div>
-                    <div class="flex justify-between">
+                    <div class="flex justify-between qris-fee-row">
                         <span>QRIS Tax</span>
                         <span>Rp <?= number_format($qris_tax, 0, ',', '.') ?></span>
                     </div>
@@ -310,11 +379,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                     </div>
                     <div class="border-t pt-2 mt-2 flex justify-between font-semibold">
                         <span>Total</span>
-                        <span>Rp <?= number_format($grand_total, 0, ',', '.') ?></span>
+                        <span id="grand-total">Rp <?= number_format($grand_total, 0, ',', '.') ?></span>
                     </div>
                 </div>
             </div>
             
+            <!-- Payment Section -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-semibold mb-4">Payment</h2>
                 
@@ -331,51 +401,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="mb-4">
-                        <!-- Add QRIS container and image elements -->
-                        <div class="p-4 bg-gray-100 rounded-md mb-4">
-                            <p class="font-medium mb-2">QRIS Payment</p>
-                            <div id="qris-container" class="flex justify-center mb-2">
-                                <div class="text-center">
-                                    <div class="inline-block p-2 bg-white rounded-lg">
-                                        <img id="qris-image" src="../assets/images/loading.gif" alt="QRIS Code" class="w-full max-w-xs mx-auto">
-                                    </div>
-                                    <p class="text-sm text-gray-600 mt-2">Total: Rp <?= number_format($grand_total, 0, ',', '.') ?></p>
-                                    <p class="text-sm text-gray-600">Scan the QR code to pay</p>
-                                </div>
+                </div>
+                
+                <!-- QRIS Payment Section - Only visible when QRIS is selected -->
+                <div id="qris-payment-section" class="p-4 bg-gray-100 rounded-md mb-4">
+                    <p class="font-medium mb-2">QRIS Payment</p>
+                    <div id="qris-container" class="flex justify-center mb-2">
+                        <div class="text-center">
+                            <div class="inline-block p-2 bg-white rounded-lg">
+                                <img id="qris-image" src="../assets/images/loading.gif" alt="QRIS Code" class="w-full max-w-xs mx-auto">
                             </div>
+                            <p class="text-sm text-gray-600 mt-2">Total: <span id="qris-amount">Rp <?= number_format($grand_total, 0, ',', '.') ?></span></p>
+                            <p class="text-sm text-gray-600">Scan the QR code to pay</p>
                         </div>
-                        
-                        <form action="payment.php" method="POST" enctype="multipart/form-data">
-                            <input type="hidden" name="nama_pemesan" value="<?= htmlspecialchars($nama_pemesan) ?>">
-                            <input type="hidden" name="alamat_pemesan" value="<?= htmlspecialchars($alamat_pemesan) ?>">
-                            <input type="hidden" name="latitude" value="<?= htmlspecialchars($latitude) ?>">
-                            <input type="hidden" name="longitude" value="<?= htmlspecialchars($longitude) ?>">
-                            <input type="hidden" name="notes" value="<?= htmlspecialchars($notes) ?>">
-                            
-                            <div class="mb-4">
-                                <label for="payment_proof" class="block text-sm font-medium text-gray-700 mb-1">Upload Payment Proof</label>
-                                <input type="file" 
-                                       id="payment_proof" 
-                                       name="payment_proof"
-                                       accept="image/*"
-                                       class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                       required>
-                                <p class="text-xs text-gray-500 mt-1">Upload a screenshot of your payment confirmation</p>
-                            </div>
-                            
-                            <div class="flex space-x-4">
-                                <a href="cart.php" class="flex-1 py-2 px-4 border border-gray-300 rounded-md text-center hover:bg-gray-50 transition">
-                                    Back to Cart
-                                </a>
-                                <button type="submit" class="flex-1 bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition">
-                                    Complete Order
-                                </button>
-                            </div>
-                        </form>
                     </div>
                 </div>
+                
+                <!-- Bank Transfer Section - Only visible when bank transfer is selected -->
+                <div id="bank-transfer-section" class="p-4 bg-gray-100 rounded-md mb-4 hidden">
+                    <p class="font-medium mb-2">Bank Transfer Information</p>
+                    <div class="bg-white p-3 rounded-md">
+                        <div class="flex items-center mb-2">
+                            <div id="bank-logo" class="w-12 h-12 flex-shrink-0 mr-3 flex items-center justify-center">
+                                <!-- Bank logo will be inserted here by JavaScript -->
+                            </div>
+                            <div>
+                                <p class="font-medium" id="bank-name"><!-- Bank name --></p>
+                                <p class="text-lg font-bold" id="bank-account"><!-- Account number --></p>
+                                <p class="text-sm text-gray-600" id="bank-account-name"><!-- Account name --></p>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <p class="text-sm text-gray-600">Please transfer the exact amount:</p>
+                            <p class="text-lg font-bold" id="bank-amount">Rp <?= number_format($grand_total - $qris_tax, 0, ',', '.') ?></p>
+                            <p class="text-sm text-gray-600 mt-2">After making the transfer, please upload the payment proof below.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <form action="payment.php" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="nama_pemesan" value="<?= htmlspecialchars($nama_pemesan) ?>">
+                    <input type="hidden" name="alamat_pemesan" value="<?= htmlspecialchars($alamat_pemesan) ?>">
+                    <input type="hidden" name="latitude" value="<?= htmlspecialchars($latitude) ?>">
+                    <input type="hidden" name="longitude" value="<?= htmlspecialchars($longitude) ?>">
+                    <input type="hidden" name="notes" value="<?= htmlspecialchars($notes) ?>">
+                    <input type="hidden" id="selected_payment_method" name="payment_method_id" value="<?= $payment_methods[0]['id'] ?? '' ?>">
+                    
+                    <div class="mb-4">
+                        <label for="payment_proof" class="block text-sm font-medium text-gray-700 mb-1">Upload Payment Proof</label>
+                        <input type="file" 
+                               id="payment_proof" 
+                               name="payment_proof"
+                               accept="image/*"
+                               class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                               required>
+                        <p class="text-xs text-gray-500 mt-1">Upload a screenshot of your payment confirmation</p>
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <a href="cart.php" class="flex-1 py-2 px-4 border border-gray-300 rounded-md text-center hover:bg-gray-50 transition">
+                            Back to Cart
+                        </a>
+                        <button type="submit" class="flex-1 bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition">
+                            Complete Order
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -387,11 +478,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
 <!-- QR Code Generator Library -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
+<!-- Add this after the Order Summary section in payment.php, before the payment form -->
+<input type="hidden" id="selected_payment_method" name="payment_method_id" value="<?= $payment_methods[0]['id'] ?? '' ?>">
+
+<!-- Add this JavaScript after the Leaflet scripts to initialize the map -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize map with the selected location
-    const latitude = <?= $latitude ?? 'null' ?>;
-    const longitude = <?= $longitude ?? 'null' ?>;
+    // Initialize map with customer location
+    const latitude = <?= $latitude ? $latitude : 'null' ?>;
+    const longitude = <?= $longitude ? $longitude : 'null' ?>;
     
     if (latitude && longitude) {
         const map = L.map('map').setView([latitude, longitude], 15);
@@ -400,20 +495,154 @@ document.addEventListener('DOMContentLoaded', function() {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
         
-        // Add marker at the delivery location
-        L.marker([latitude, longitude]).addTo(map)
-            .bindPopup('Delivery Location')
-            .openPopup();
-    } // Added missing closing bracket here
+        // Add marker for delivery location
+        const marker = L.marker([latitude, longitude]).addTo(map);
+        marker.bindPopup("<b>Delivery Location</b><br>" + "<?= htmlspecialchars($alamat_pemesan) ?>").openPopup();
+    } else {
+        document.getElementById('map').innerHTML = '<div class="flex items-center justify-center h-full bg-gray-100 text-gray-500">Location not available</div>';
+    }
+});
+</script>
+
+<?php require_once '../includes/footer.php';?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Store original values
+    const originalGrandTotal = <?= $grand_total ?>;
+    const qrisTax = <?= $qris_tax ?>;
+    const appTax = <?= $app_tax ?>;
+    const subtotal = <?= $subtotal ?>;
     
-    // Generate dynamic QRIS code
-    const grandTotal = <?= $grand_total ?>;
-    const qrisContainer = document.getElementById('qris-container');
-    const qrisImage = document.getElementById('qris-image');
+    // Get payment method elements
+    const paymentMethodRadios = document.querySelectorAll('.payment-method-radio');
+    const selectedPaymentMethodInput = document.getElementById('selected_payment_method');
+    const qrisSection = document.getElementById('qris-payment-section');
+    const bankSection = document.getElementById('bank-transfer-section');
+    const qrisFeeRow = document.querySelector('.qris-fee-row');
+    const grandTotalElement = document.getElementById('grand-total');
+    const qrisAmountElement = document.getElementById('qris-amount');
+    const bankAmountElement = document.getElementById('bank-amount');
     
-    if (qrisContainer && qrisImage) {
+    // Bank transfer elements
+    const bankLogo = document.getElementById('bank-logo');
+    const bankName = document.getElementById('bank-name');
+    const bankAccount = document.getElementById('bank-account');
+    const bankAccountName = document.getElementById('bank-account-name');
+    
+    // Get payment methods data
+    const paymentMethods = <?= json_encode($payment_methods) ?>;
+    
+    // Function to format currency
+    function formatCurrency(amount) {
+        return 'Rp ' + amount.toLocaleString('id-ID');
+    }
+    
+    // Function to update payment sections visibility
+    function updatePaymentSections(methodName) {
+        const isQris = methodName.toLowerCase() === 'qris';
+        
+        // Show/hide payment sections
+        qrisSection.classList.toggle('hidden', !isQris);
+        bankSection.classList.toggle('hidden', isQris);
+        
+        // Show/hide QRIS fee
+        qrisFeeRow.classList.toggle('hidden', !isQris);
+        
+        // Update grand total
+        const currentTotal = isQris ? originalGrandTotal : (originalGrandTotal - qrisTax);
+        grandTotalElement.textContent = formatCurrency(currentTotal);
+        
+        // Update amount displays
+        qrisAmountElement.textContent = formatCurrency(originalGrandTotal);
+        bankAmountElement.textContent = formatCurrency(currentTotal);
+    }
+    
+    // Function to update bank transfer information
+    function updateBankInfo(methodId) {
+        const method = paymentMethods.find(m => m.id == methodId);
+        if (!method) return;
+        
+        // Update bank information
+        bankName.textContent = method.name;
+        bankAccount.textContent = method.account_number;
+        bankAccountName.textContent = method.account_name;
+        
+        // Update bank logo
+        if (method.logo) {
+            bankLogo.innerHTML = `<img src="../assets/images/payment/${method.logo}" alt="${method.name}" class="h-8 w-auto">`;
+        } else {
+            bankLogo.innerHTML = `<div class="bg-gray-200 h-8 w-8 flex items-center justify-center rounded"><i class="fas fa-credit-card text-gray-500"></i></div>`;
+        }
+    }
+    
+    // Initialize with first payment method
+    if (paymentMethodRadios.length > 0) {
+        const firstMethod = paymentMethodRadios[0];
+        const methodContainer = firstMethod.closest('[data-payment-method]');
+        const methodName = methodContainer.dataset.paymentMethod;
+        
+        updatePaymentSections(methodName);
+        updateBankInfo(firstMethod.value);
+        
+        // Generate QRIS if first method is QRIS
+        if (methodName.toLowerCase() === 'qris') {
+            generateQRIS(originalGrandTotal);
+        }
+    }
+    
+    // Handle payment method selection
+    paymentMethodRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Update hidden input value
+            selectedPaymentMethodInput.value = this.value;
+            
+            // Get method name from container
+            const methodContainer = this.closest('[data-payment-method]');
+            const methodName = methodContainer.dataset.paymentMethod;
+            
+            // Update payment sections
+            updatePaymentSections(methodName);
+            updateBankInfo(this.value);
+            
+            // Generate QRIS if QRIS is selected
+            if (methodName.toLowerCase() === 'qris') {
+                generateQRIS(originalGrandTotal);
+            }
+            
+            // Update visual indicators
+            document.querySelectorAll('.payment-method-indicator').forEach(indicator => {
+                indicator.classList.remove('border-orange-500');
+                indicator.classList.add('border-gray-300');
+                indicator.querySelector('div').classList.remove('bg-orange-500');
+            });
+            
+            // Update container styles
+            document.querySelectorAll('.payment-method-radio').forEach(r => {
+                const container = r.closest('.border');
+                container.classList.remove('border-orange-500', 'bg-orange-50');
+            });
+            
+            // Highlight selected method
+            const container = this.closest('.border');
+            container.classList.add('border-orange-500', 'bg-orange-50');
+            
+            const indicator = container.querySelector('.payment-method-indicator');
+            indicator.classList.remove('border-gray-300');
+            indicator.classList.add('border-orange-500');
+            indicator.querySelector('div').classList.add('bg-orange-500');
+        });
+    });
+    
+    // Function to generate QRIS code
+    function generateQRIS(amount) {
+        const qrisImage = document.getElementById('qris-image');
+        
+        // Show loading image
+        qrisImage.src = '../assets/images/loading.gif';
+        
         // Fetch dynamic QRIS from server
-        fetch('../includes/generate_dynamic_qris.php?amount=' + grandTotal)
+        fetch('../includes/generate_dynamic_qris.php?amount=' + amount)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -436,6 +665,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         qrisImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(data.qris_code);
                     }
                 } else {
+                    const qrisContainer = document.getElementById('qris-container');
                     qrisContainer.innerHTML = `
                         <div class="text-center p-4">
                             <p class="text-red-500">${data.message || 'Failed to generate QRIS code'}</p>
@@ -445,7 +675,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                console.error('Error generating QRIS:', error);
+                console.error('Error:', error);
+                const qrisContainer = document.getElementById('qris-container');
                 qrisContainer.innerHTML = `
                     <div class="text-center p-4">
                         <p class="text-red-500">Failed to generate QRIS code</p>
@@ -456,5 +687,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
-<?php require_once '../includes/footer.php'; ?>

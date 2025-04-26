@@ -293,8 +293,24 @@ foreach ($cart_items as $item) {
                         <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Lokasi Pengiriman</label>
                         <div id="map" class="w-full h-64 rounded-md border mb-2"></div>
                         <p class="text-sm text-gray-500 mb-2">Geser pin untuk menentukan lokasi yang tepat</p>
-                        <input type="hidden" id="latitude" name="latitude" required>
-                        <input type="hidden" id="longitude" name="longitude" required>
+                        <!-- In the checkout form in cart.php, make sure these fields are included -->
+                        <input type="hidden" name="latitude" id="latitude" value="">
+                        <input type="hidden" name="longitude" id="longitude" value="">
+                        
+                        <!-- Add this JavaScript to capture coordinates -->
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Try to get user's location
+                            if (navigator.geolocation) {
+                                navigator.geolocation.getCurrentPosition(function(position) {
+                                    document.getElementById('latitude').value = position.coords.latitude;
+                                    document.getElementById('longitude').value = position.coords.longitude;
+                                }, function(error) {
+                                    console.error("Error getting location: ", error);
+                                });
+                            }
+                        });
+                        </script>
                     </div>
                 </div>
             </div>

@@ -23,9 +23,6 @@ $requested_path = htmlspecialchars($_SERVER['REQUEST_URI']);
                 Kembali ke Beranda
             </a>
         </div>
-        <div class="mt-12">
-            <img src="assets/images/404-illustration.png" alt="404 Illustration" class="max-w-xs mx-auto opacity-75" onerror="this.src='assets/images/hero-food.jpg'; this.style.maxWidth='200px'; this.style.borderRadius='50%';">
-        </div>
     </div>
 </div>
 

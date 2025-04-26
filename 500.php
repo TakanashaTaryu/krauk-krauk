@@ -6,6 +6,13 @@ require_once 'includes/header.php';
 
 <div class="container mx-auto px-4 py-12">
     <div class="text-center max-w-lg mx-auto">
+    <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        
         <div class="mb-8">
             <span class="text-orange-600 text-8xl font-bold">500</span>
         </div>

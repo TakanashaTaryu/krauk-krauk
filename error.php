@@ -9,12 +9,9 @@ http_response_code($error_code);
 $error_messages = [
     400 => 'Permintaan Tidak Valid',
     401 => 'Tidak Terotentikasi',
-    403 => 'Akses Ditolak',
-    404 => 'Halaman Tidak Ditemukan',
     405 => 'Metode Tidak Diizinkan',
     408 => 'Waktu Permintaan Habis',
     429 => 'Terlalu Banyak Permintaan',
-    500 => 'Kesalahan Server Internal',
     502 => 'Gateway Tidak Valid',
     503 => 'Layanan Tidak Tersedia',
     504 => 'Waktu Gateway Habis'
@@ -31,6 +28,12 @@ require_once 'includes/header.php';
 <div class="container mx-auto px-4 py-12">
     <div class="text-center max-w-lg mx-auto">
         <div class="mb-8">
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
             <span class="text-orange-600 text-8xl font-bold"><?= $error_code ?></span>
         </div>
         <h1 class="text-4xl font-bold mb-4"><?= $error_message ?></h1>

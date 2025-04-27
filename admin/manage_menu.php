@@ -170,8 +170,16 @@ foreach ($menu_items as $item) {
         </button>
     </div>
     
+    <!-- Modify the menu item display section to include "Stock Terjual" -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php foreach ($menu_items as $item): ?>
+        <?php
+        // Get sold stock count for this menu item
+        $stmt = $pdo->prepare("SELECT SUM(jumlah) as total_sold FROM pesanan_detail WHERE id_menu = ?");
+        $stmt->execute([$item['id']]);
+        $sold_data = $stmt->fetch();
+        $stock_terjual = $sold_data['total_sold'] ? (int)$sold_data['total_sold'] : 0;
+        ?>
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <img src="../assets/images/menu/<?= htmlspecialchars($item['gambar']) ?>" 
                  alt="<?= htmlspecialchars($item['nama']) ?>"
@@ -180,7 +188,10 @@ foreach ($menu_items as $item) {
             <div class="p-4">
                 <h3 class="text-xl font-bold mb-2"><?= htmlspecialchars($item['nama']) ?></h3>
                 <p class="text-gray-600 mb-2"><?= htmlspecialchars($item['deskripsi']) ?></p>
-                <p class="mb-2">Stock: <?= $item['stok'] ?></p>
+                <div class="flex justify-between mb-2">
+                    <p>Stock: <?= $item['stok'] ?></p>
+                    <p class="text-green-600">Stock Terjual: <?= $stock_terjual ?></p>
+                </div>
                 <p class="mb-4">Price: Rp<?= number_format($item['harga'], 0, ',', '.') ?></p>
                 
                 <!-- Add-ons section -->

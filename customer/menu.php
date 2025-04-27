@@ -67,6 +67,21 @@ $menu_items = $stmt->fetchAll();
 
 <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold mb-8">Menu Makanan</h1>
+                    <!-- Pre-order Notice -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded-md">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">Informasi</h3>
+                            <div class="mt-1 text-sm text-blue-700">
+                                <p>Saat ini kami hanya melayani pemesanan di area Dayeuhkolot-Telkomuniversity-Bojongsoang</p>                              </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <?php foreach ($menu_items as $item): ?>

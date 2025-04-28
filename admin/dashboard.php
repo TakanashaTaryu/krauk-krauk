@@ -76,12 +76,13 @@ $stmt = $pdo->query("
 ");
 $monthlyRevenue = $stmt->fetchAll();
 
-// Get weekly revenue data
+// Get weekly revenue data - updating this query to properly group by week
 $stmt = $pdo->query("
-    SELECT YEARWEEK(waktu_pemesanan, 1) as week_number,
-           MIN(DATE(waktu_pemesanan)) as week_start,
-           MAX(DATE(waktu_pemesanan)) as week_end,
-           SUM(total_harga) as weekly_total
+    SELECT 
+        YEARWEEK(waktu_pemesanan, 1) as week_number,
+        MIN(DATE(waktu_pemesanan)) as week_start,
+        DATE_ADD(MIN(DATE(waktu_pemesanan)), INTERVAL 6 DAY) as week_end,
+        SUM(total_harga) as weekly_total
     FROM pesanan
     WHERE status IN ('Diterima', 'Diproses', 'Diperjalanan', 'Telah Sampai')
     GROUP BY YEARWEEK(waktu_pemesanan, 1)
@@ -366,8 +367,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <?php 
             $labels = [];
             foreach (array_reverse($weeklyRevenue) as $week) {
-                $labels[] = "'" . date('d M', strtotime($week['week_start'])) . " - " . 
-                             date('d M', strtotime($week['week_end'])) . "'";
+                // Format dates to show proper week ranges
+                $week_start = date('d M', strtotime($week['week_start']));
+                $week_end = date('d M', strtotime($week['week_end']));
+                $labels[] = "'" . $week_start . " - " . $week_end . "'";
             }
             echo implode(', ', $labels);
             ?>

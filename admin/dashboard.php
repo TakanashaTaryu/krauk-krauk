@@ -29,6 +29,12 @@ $totalRevenue = $stmt->fetch()['total'] ?? 0;
 $stmt = $pdo->query("SELECT SUM(total_harga) as total FROM pesanan WHERE status IN ('Diterima','Telah Sampai','Diproses','Diperjalanan','Telah Samapai') AND DATE(waktu_pemesanan) = CURDATE()");
 $todayRevenue = $stmt->fetch()['total'] ?? 0;
 
+// Get this week's revenue
+$stmt = $pdo->query("SELECT SUM(total_harga) as total FROM pesanan 
+                     WHERE status IN ('Diterima','Telah Sampai','Diproses','Diperjalanan','Telah Samapai') 
+                     AND YEARWEEK(waktu_pemesanan, 1) = YEARWEEK(CURDATE(), 1)");
+$thisWeekRevenue = $stmt->fetch()['total'] ?? 0;
+
 $stmt = $pdo->query("SELECT COUNT(*) as total FROM pesanan WHERE DATE(waktu_pemesanan) = CURDATE()");
 $todayOrders = $stmt->fetch()['total'];
 
@@ -69,14 +75,28 @@ $stmt = $pdo->query("
     ORDER BY month DESC
 ");
 $monthlyRevenue = $stmt->fetchAll();
+
+// Get weekly revenue data
+$stmt = $pdo->query("
+    SELECT YEARWEEK(waktu_pemesanan, 1) as week_number,
+           MIN(DATE(waktu_pemesanan)) as week_start,
+           MAX(DATE(waktu_pemesanan)) as week_end,
+           SUM(total_harga) as weekly_total
+    FROM pesanan
+    WHERE status IN ('Diterima', 'Diproses', 'Diperjalanan', 'Telah Sampai')
+    GROUP BY YEARWEEK(waktu_pemesanan, 1)
+    ORDER BY week_number DESC
+    LIMIT 8
+");
+$weeklyRevenue = $stmt->fetchAll();
 ?>
 
 <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold mb-8 text-gray-800">Admin Dashboard</h1>
     
     <!-- Revenue Section -->
-    <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 mb-8 text-white">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+     <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 mb-8 text-white">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
                 <h3 class="text-lg opacity-90 mb-2">Total Revenue</h3>
                 <p class="text-4xl font-bold">Rp <?= number_format($totalRevenue, 0, ',', '.') ?></p>
@@ -86,14 +106,25 @@ $monthlyRevenue = $stmt->fetchAll();
                 <p class="text-4xl font-bold">Rp <?= number_format($todayRevenue, 0, ',', '.') ?></p>
             </div>
             <div>
-                <h3 class="text-lg opacity-90 mb-2">Monthly Growth</h3>
+                <h3 class="text-lg opacity-90 mb-2">This Week Revenue</h3>
+                <p class="text-4xl font-bold">Rp <?= number_format($thisWeekRevenue, 0, ',', '.') ?></p>
+            </div>
+            <div>
+                <h3 class="text-lg opacity-90 mb-2">Weekly Growth</h3>
                 <p class="text-4xl font-bold">
                     <?php
-                    if (count($monthlyRevenue) >= 2) {
-                        $currentMonth = $monthlyRevenue[0]['monthly_total'];
-                        $lastMonth = $monthlyRevenue[1]['monthly_total'];
-                        $growth = $lastMonth != 0 ? (($currentMonth - $lastMonth) / $lastMonth) * 100 : 0;
+                    if (count($weeklyRevenue) >= 2) {
+                        $currentWeek = $weeklyRevenue[0]['weekly_total'];
+                        $lastWeek = $weeklyRevenue[1]['weekly_total'];
+                        $growth = $lastWeek != 0 ? (($currentWeek - $lastWeek) / $lastWeek) * 100 : 0;
                         echo round($growth, 1) . '%';
+                        
+                        // Add an icon to indicate growth direction
+                        if ($growth > 0) {
+                            echo ' <i class="fas fa-arrow-up"></i>';
+                        } elseif ($growth < 0) {
+                            echo ' <i class="fas fa-arrow-down"></i>';
+                        }
                     } else {
                         echo "N/A";
                     }
@@ -314,3 +345,78 @@ $monthlyRevenue = $stmt->fetchAll();
 </div>
 
 <?php require_once '../includes/footer.php'; ?>
+
+<!-- Weekly Revenue Chart -->
+<div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">Weekly Revenue</h2>
+    <div class="h-64">
+        <canvas id="weeklyRevenueChart"></canvas>
+    </div>
+</div>
+
+<!-- Add this before the footer include -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Weekly Revenue Chart
+    const weeklyRevenueCtx = document.getElementById('weeklyRevenueChart').getContext('2d');
+    
+    const weeklyRevenueData = {
+        labels: [
+            <?php 
+            $labels = [];
+            foreach (array_reverse($weeklyRevenue) as $week) {
+                $labels[] = "'" . date('d M', strtotime($week['week_start'])) . " - " . 
+                             date('d M', strtotime($week['week_end'])) . "'";
+            }
+            echo implode(', ', $labels);
+            ?>
+        ],
+        datasets: [{
+            label: 'Weekly Revenue',
+            data: [
+                <?php 
+                $data = [];
+                foreach (array_reverse($weeklyRevenue) as $week) {
+                    $data[] = $week['weekly_total'];
+                }
+                echo implode(', ', $data);
+                ?>
+            ],
+            backgroundColor: 'rgba(237, 137, 54, 0.2)',
+            borderColor: 'rgba(237, 137, 54, 1)',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true
+        }]
+    };
+    
+    new Chart(weeklyRevenueCtx, {
+        type: 'line',
+        data: weeklyRevenueData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + value.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Revenue: Rp ' + context.raw.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>

@@ -13,7 +13,7 @@ $stmt = $pdo->prepare("
     JOIN akun a ON p.id_customer = a.id
     JOIN pesanan_detail pd ON p.id = pd.id_pesanan
     JOIN menu m ON pd.id_menu = m.id
-    WHERE p.status = 'Diproses'
+    WHERE p.status IN ('Diterima','Diproses')
     GROUP BY p.id
     ORDER BY p.waktu_pemesanan ASC
 ");

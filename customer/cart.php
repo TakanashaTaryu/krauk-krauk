@@ -66,7 +66,7 @@ foreach ($cart_items as $item) {
 ?>
 
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6">Your Cart</h1>
+    <h1 class="text-3xl font-bold mb-6">Keranjang Kamu</h1>
     
     <!-- Pre-order Notice -->
     <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-md">
@@ -75,9 +75,9 @@ foreach ($cart_items as $item) {
                 <i class="fas fa-info-circle text-blue-500"></i>
             </div>
             <div class="ml-3">
-                <h3 class="text-sm font-medium text-blue-800">Pre-Order Information</h3>
+                <h3 class="text-sm font-medium text-blue-800">Informasi Pre Order</h3>
                 <div class="mt-1 text-sm text-blue-700">
-                    <p>All items are made to order and will be processed within 1-3 days after payment confirmation.</p>
+                    <p>Semua item pembelian akan diproses dan diantar dalam kurun waktu 2-4 hari sejak pesanan dikonfirmasi.</p>
                 </div>
             </div>
         </div>
@@ -92,11 +92,11 @@ foreach ($cart_items as $item) {
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="py-3 px-4 text-left">Menu</th>
-                            <th class="py-3 px-4 text-center">Price</th>
-                            <th class="py-3 px-4 text-center">Quantity</th>
-                            <th class="py-3 px-4 text-center">Add-ons</th>
+                            <th class="py-3 px-4 text-center">Harga</th>
+                            <th class="py-3 px-4 text-center">Jumlah</th>
+                            <th class="py-3 px-4 text-center">Tambahan</th>
                             <th class="py-3 px-4 text-center">Subtotal</th>
-                            <th class="py-3 px-4 text-center">Action</th>
+                            <th class="py-3 px-4 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="cartItems">
@@ -139,7 +139,7 @@ foreach ($cart_items as $item) {
                                     <?php endforeach; ?>
                                 </div>
                                 <?php else: ?>
-                                <span class="text-gray-500 text-sm">No add-ons available</span>
+                                <span class="text-gray-500 text-sm">Tidak ada tambahan tersedia</span>
                                 <?php endif; ?>
                             </td>
                             <td class="py-4 px-4 text-center subtotal" data-item-id="<?= $item['id'] ?>">
@@ -197,7 +197,7 @@ foreach ($cart_items as $item) {
                     <!-- Add-ons section for mobile -->
                     <?php if (!empty($menu_addons[$item['menu_id']])): ?>
                     <div class="mb-3">
-                        <h4 class="font-medium text-sm mb-1">Add-ons:</h4>
+                        <h4 class="font-medium text-sm mb-1">Tambahan:</h4>
                         <div class="pl-2">
                             <?php foreach ($menu_addons[$item['menu_id']] as $addon): ?>
                             <div class="flex items-center mb-1">
@@ -218,7 +218,7 @@ foreach ($cart_items as $item) {
                     
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
-                            <label class="mr-2 text-sm text-gray-600">Quantity:</label>
+                            <label class="mr-2 text-sm text-gray-600">Jumlah:</label>
                             <input type="number" 
                                    value="<?= $item['jumlah'] ?>" 
                                    min="1" 
@@ -250,14 +250,14 @@ foreach ($cart_items as $item) {
             
             <div class="mb-4">
                 <a href="../customer/menu.php" class="text-orange-600 hover:underline inline-flex items-center">
-                    <i class="fas fa-arrow-left mr-2"></i> Continue Shopping
+                    <i class="fas fa-arrow-left mr-2"></i> Kembali ke Menu
                 </a>
             </div>
         </div>
 
         <div class="lg:col-span-1">
             <div class="bg-white rounded-lg shadow-md p-6 mb-4">
-                <h3 class="text-lg font-semibold mb-4">Delivery Information</h3>
+                <h3 class="text-lg font-semibold mb-4">Informasi Pengiriman</h3>
                 <div class="space-y-4">
                     <div>
                         <label for="nama_pemesan" class="block text-sm font-medium text-gray-700 mb-1">Nama Pemesan</label>
@@ -280,7 +280,7 @@ foreach ($cart_items as $item) {
                     
                     <!-- Add notes field -->
                     <div>
-                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Special Instructions (Optional)</label>
+                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
                         <textarea id="notes" 
                                   name="notes"
                                   rows="2" 
@@ -325,16 +325,16 @@ foreach ($cart_items as $item) {
                 <input type="hidden" name="preview_order" value="1">
                 <button type="submit"
                         class="w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition">
-                    Review Order
+                    Lihat Pesanan
                 </button>
             </div>
         </div>
     </form>
     <?php else: ?>
     <div class="bg-white rounded-lg shadow-md p-8 text-center">
-        <p class="text-gray-500 mb-4">Your cart is empty</p>
+        <p class="text-gray-500 mb-4">Keranjang Kamu Kosong</p>
         <a href="../customer/menu.php" class="text-orange-600 hover:underline inline-flex items-center justify-center">
-            <i class="fas fa-arrow-left mr-2"></i> Back to Menu
+            <i class="fas fa-arrow-left mr-2"></i> Kembali ke Menu
         </a>
     </div>
     <?php endif; ?>

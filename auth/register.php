@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="mb-4">
-                <label for="no_telp" class="block text-gray-700 font-medium mb-2">Phone Number</label>
+                <label for="no_telp" class="block text-gray-700 font-medium mb-2">Nomor Telp</label>
                 <input 
                     type="tel" 
                     id="no_telp" 

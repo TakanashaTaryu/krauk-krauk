@@ -105,17 +105,17 @@ $page_title = "Chat";
     <!-- Mobile view: Conversation selector dropdown (visible only on mobile) -->
     <div class="md:hidden mb-4">
         <div class="flex items-center justify-between mb-2">
-            <h2 class="text-lg font-semibold">Conversations</h2>
+            <h2 class="text-lg font-semibold">Konversasi</h2>
             <a href="orders.php" class="text-orange-600 hover:underline flex items-center text-sm">
-                <i class="fas fa-arrow-left mr-1"></i> Back
+                <i class="fas fa-arrow-left mr-1"></i> Kembali
             </a>
         </div>
         
         <select id="mobile-conversation-selector" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-            <option value="">Select a conversation</option>
+            <option value="">Pilih Percakapan</option>
             <?php foreach ($conversations as $conv): ?>
                 <option value="<?= $conv['id'] ?>" <?= ($conversation_id == $conv['id']) ? 'selected' : '' ?>>
-                    Order #<?= $conv['order_id'] ?> - <?= $conv['status'] ?>
+                    Pesanan #<?= $conv['order_id'] ?> - <?= $conv['status'] ?>
                     <?= $conv['unread_count'] > 0 ? " ({$conv['unread_count']} new)" : "" ?>
                 </option>
             <?php endforeach; ?>
@@ -126,14 +126,14 @@ $page_title = "Chat";
         <!-- Conversations List (hidden on mobile) -->
         <div class="hidden md:block w-full md:w-1/3 bg-white rounded-lg shadow-md p-4">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold">Your Conversations</h2>
+                <h2 class="text-xl font-semibold">Percakapan Anda</h2>
                 <a href="orders.php" class="text-orange-600 hover:underline flex items-center text-sm">
-                    <i class="fas fa-arrow-left mr-1"></i> Back
+                    <i class="fas fa-arrow-left mr-1"></i> Kembali
                 </a>
             </div>
             
             <?php if (empty($conversations)): ?>
-                <p class="text-gray-500">Select a conversation from the list or start a new one from your orders page.</p>
+                <p class="text-gray-500">Pilih percakapan dari list atau mulai baru dari list pesanan</p>
             <?php else: ?>
                 <div class="space-y-2">
                     <?php foreach ($conversations as $conv): ?>
@@ -141,7 +141,7 @@ $page_title = "Chat";
                            class="block p-3 rounded-md <?= ($conversation_id == $conv['id']) ? 'bg-orange-100' : 'hover:bg-gray-100' ?>">
                             <div class="flex justify-between items-center">
                                 <div>
-                                    <p class="font-medium">Order #<?= htmlspecialchars($conv['order_id']) ?></p>
+                                    <p class="font-medium">Pesanan #<?= htmlspecialchars($conv['order_id']) ?></p>
                                     <p class="text-sm text-gray-500">Status: <?= htmlspecialchars($conv['status']) ?></p>
                                     <p class="text-sm text-gray-500">
                                         <?= date('M d, Y H:i', strtotime($conv['created_at'])) ?>
@@ -167,7 +167,7 @@ $page_title = "Chat";
                     <div class="p-3 md:p-4 border-b">
                         <div class="flex justify-between items-center">
                             <div>
-                                <h3 class="font-semibold">Order #<?= $current_conversation['order_id'] ?></h3>
+                                <h3 class="font-semibold">Pesanan #<?= $current_conversation['order_id'] ?></h3>
                                 <p class="text-xs md:text-sm text-gray-500">
                                     Status: <?= $current_conversation['status'] ?> | 
                                     Total: Rp <?= number_format($current_conversation['total_harga'], 0, ',', '.') ?>
@@ -214,10 +214,10 @@ $page_title = "Chat";
             <?php else: ?>
                 <div class="bg-white rounded-lg shadow-md p-6 md:p-8 text-center">
                     <i class="fas fa-comments text-orange-600 text-4xl md:text-5xl mb-4"></i>
-                    <h3 class="text-lg md:text-xl font-semibold mb-2">No conversation selected</h3>
-                    <p class="text-gray-500 mb-4">Select a conversation from the list or start a new one from your orders page.</p>
+                    <h3 class="text-lg md:text-xl font-semibold mb-2">Tidak ada pesanan terpilih</h3>
+                    <p class="text-gray-500 mb-4">Pilih percakapan dari list atau mulai baru dari list pesanan.</p>
                     <a href="orders.php" class="inline-block bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">
-                        Go to Orders
+                        Kembali ke Pesanan
                     </a>
                 </div>
             <?php endif; ?>
@@ -229,14 +229,14 @@ $page_title = "Chat";
 <div id="mobile-conversations-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
     <div class="bg-white w-full h-full md:w-80 md:h-auto md:rounded-lg md:mx-auto md:mt-20 p-4 overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Your Conversations</h3>
+            <h3 class="text-lg font-semibold">Percakapan Anda</h3>
             <button id="close-conversations" class="text-gray-500">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         
         <?php if (empty($conversations)): ?>
-            <p class="text-gray-500">No conversations yet.</p>
+            <p class="text-gray-500">Belum ada percakapan.</p>
         <?php else: ?>
             <div class="space-y-2">
                 <?php foreach ($conversations as $conv): ?>
@@ -263,7 +263,7 @@ $page_title = "Chat";
         
         <div class="mt-4 pt-4 border-t">
             <a href="orders.php" class="block w-full text-center bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">
-                Go to Orders
+                Kembali ke Pesanan
             </a>
         </div>
     </div>

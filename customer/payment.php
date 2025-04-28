@@ -231,14 +231,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
 ?>
 
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">Review Order</h1>
+    <h1 class="text-3xl font-bold mb-8">Review Pesanan</h1>
     
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2">
             <!-- Payment Method Selection - Moved to top -->
             <!-- Replace the payment method section with this updated version -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-4">Payment Method</h2>
+                <h2 class="text-xl font-semibold mb-4">Metode Pembayaran</h2>
                 
                 <?php
                 // Get active payment methods
@@ -246,7 +246,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                 $payment_methods = $stmt->fetchAll();
                 
                 if (empty($payment_methods)) {
-                    echo '<p class="text-gray-500">No payment methods available. Please contact administrator.</p>';
+                    echo '<p class="text-gray-500">Tidak ada metode pembayaran tersedia, silahkan kontak Admin.</p>';
                 } else {
                 ?>
                 <div class="space-y-3">
@@ -293,21 +293,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
             
             <!-- Delivery Information -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-4">Delivery Information</h2>
+                <h2 class="text-xl font-semibold mb-4">Informasi Pengiriman</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <p class="text-gray-600 text-sm">Name:</p>
+                        <p class="text-gray-600 text-sm">Nama:</p>
                         <p class="font-medium"><?= htmlspecialchars($nama_pemesan) ?></p>
                     </div>
                     <div>
-                        <p class="text-gray-600 text-sm">Address:</p>
+                        <p class="text-gray-600 text-sm">Alamat:</p>
                         <p class="font-medium"><?= htmlspecialchars($alamat_pemesan) ?></p>
                     </div>
                 </div>
                 
                 <?php if (!empty($notes)): ?>
                 <div class="mb-4">
-                    <p class="text-gray-600 text-sm">Special Instructions:</p>
+                    <p class="text-gray-600 text-sm">Catatan:</p>
                     <p class="font-medium"><?= htmlspecialchars($notes) ?></p>
                 </div>
                 <?php endif; ?>
@@ -317,7 +317,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
             
             <!-- Order Items -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-                <h2 class="text-xl font-semibold p-6 pb-3">Order Items</h2>
+                <h2 class="text-xl font-semibold p-6 pb-3">Item Pesanan</h2>
                 
                 <div class="px-6">
                     <?php foreach ($items_with_addons as $index => $order_item): ?>
@@ -333,11 +333,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                                     <h3 class="font-medium"><?= htmlspecialchars($order_item['item']['nama']) ?></h3>
                                     <p class="font-medium">Rp <?= number_format($order_item['item']['harga'], 0, ',', '.') ?></p>
                                 </div>
-                                <p class="text-gray-600">Quantity: <?= $order_item['item']['jumlah'] ?></p>
+                                <p class="text-gray-600">Jumlah: <?= $order_item['item']['jumlah'] ?></p>
                                 
                                 <?php if (!empty($order_item['addons'])): ?>
                                 <div class="mt-2">
-                                    <p class="text-sm text-gray-600">Add-ons:</p>
+                                    <p class="text-sm text-gray-600">Tambahan:</p>
                                     <ul class="pl-4 text-sm">
                                         <?php foreach ($order_item['addons'] as $addon): ?>
                                         <li class="flex justify-between">
@@ -363,7 +363,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
         <div class="lg:col-span-1">
             <!-- Order Summary -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+                <h2 class="text-xl font-semibold mb-4">Ringkasan Pesanan</h2>
                 <div class="space-y-2 mb-4">
                     <div class="flex justify-between">
                         <span>Subtotal</span>
@@ -386,7 +386,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
             
             <!-- Payment Section -->
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold mb-4">Payment</h2>
+                <h2 class="text-xl font-semibold mb-4">Pembayaran</h2>
                 
                 <!-- Pre-order Notice -->
                 <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded-md">
@@ -397,7 +397,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                         <div class="ml-3">
                             <h3 class="text-sm font-medium text-blue-800">Pre-Order Information</h3>
                             <div class="mt-1 text-sm text-blue-700">
-                                <p>Your order will be collected from 27-28 April (Pre Order) and will be send on 29 April </p>
+                                <p>Pesanan akan dikumpulkan dari 27-28 April (Pre Order) dan akan dikirim pada 29 April </p>
                             </div>
                         </div>
                     </div>
@@ -405,21 +405,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                 
                 <!-- QRIS Payment Section - Only visible when QRIS is selected -->
                 <div id="qris-payment-section" class="p-4 bg-gray-100 rounded-md mb-4">
-                    <p class="font-medium mb-2">QRIS Payment</p>
+                    <p class="font-medium mb-2">Pembayaran QRIS</p>
                     <div id="qris-container" class="flex justify-center mb-2">
                         <div class="text-center">
                             <div class="inline-block p-2 bg-white rounded-lg">
                                 <img id="qris-image" src="../assets/images/loading.gif" alt="QRIS Code" class="w-full max-w-xs mx-auto">
                             </div>
                             <p class="text-sm text-gray-600 mt-2">Total: <span id="qris-amount">Rp <?= number_format($grand_total, 0, ',', '.') ?></span></p>
-                            <p class="text-sm text-gray-600">Scan the QR code to pay</p>
+                            <p class="text-sm text-gray-600">Scan kode QR untuk melakukan pembayaran</p>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Bank Transfer Section - Only visible when bank transfer is selected -->
                 <div id="bank-transfer-section" class="p-4 bg-gray-100 rounded-md mb-4 hidden">
-                    <p class="font-medium mb-2">Bank Transfer Information</p>
+                    <p class="font-medium mb-2">Informasi Transfer Bank</p>
                     <div class="bg-white p-3 rounded-md">
                         <div class="flex items-center mb-2">
                             <div id="bank-logo" class="w-12 h-12 flex-shrink-0 mr-3 flex items-center justify-center">
@@ -432,9 +432,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                             </div>
                         </div>
                         <div class="mt-3 pt-3 border-t border-gray-200">
-                            <p class="text-sm text-gray-600">Please transfer the exact amount:</p>
+                            <p class="text-sm text-gray-600">Masukan jumlah harga pesanan:</p>
                             <p class="text-lg font-bold" id="bank-amount">Rp <?= number_format($grand_total - $qris_tax, 0, ',', '.') ?></p>
-                            <p class="text-sm text-gray-600 mt-2">After making the transfer, please upload the payment proof below.</p>
+                            <p class="text-sm text-gray-600 mt-2">Setelah melakukan transfer, silahkan unggah bukti pembayaran dibawah ini.</p>
                         </div>
                     </div>
                 </div>
@@ -448,22 +448,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                     <input type="hidden" id="selected_payment_method" name="payment_method_id" value="<?= $payment_methods[0]['id'] ?? '' ?>">
                     
                     <div class="mb-4">
-                        <label for="payment_proof" class="block text-sm font-medium text-gray-700 mb-1">Upload Payment Proof</label>
+                        <label for="payment_proof" class="block text-sm font-medium text-gray-700 mb-1">Unggah Bukti Pembayaran</label>
                         <input type="file" 
                                id="payment_proof" 
                                name="payment_proof"
                                accept="image/*"
                                class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                                required>
-                        <p class="text-xs text-gray-500 mt-1">Upload a screenshot of your payment confirmation</p>
+                        <p class="text-xs text-gray-500 mt-1">Unggah Screenshoot bukti pembayaran</p>
                     </div>
                     
                     <div class="flex space-x-4">
                         <a href="cart.php" class="flex-1 py-2 px-4 border border-gray-300 rounded-md text-center hover:bg-gray-50 transition">
-                            Back to Cart
+                            Kembali ke keranjang
                         </a>
                         <button type="submit" class="flex-1 bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition">
-                            Complete Order
+                            Order Sekarang
                         </button>
                     </div>
                 </form>

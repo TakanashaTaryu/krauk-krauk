@@ -48,11 +48,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-md mx-auto">
-        <h1 class="text-3xl font-bold mb-8">Profile Settings</h1>
+        <h1 class="text-3xl font-bold mb-8">Setting Profil</h1>
         
         <div class="bg-white rounded-lg shadow p-6">
             <div class="mb-6">
-                <h2 class="text-xl font-bold mb-4">Account Information</h2>
+                <h2 class="text-xl font-bold mb-4">Informasi Akun</h2>
                 <form method="POST">
                     <div class="mb-4">
                         <label class="block text-gray-700 font-bold mb-2">Email</label>
@@ -60,43 +60,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <div class="mb-4">
-                        <label class="block text-gray-700 font-bold mb-2">Phone Number</label>
+                        <label class="block text-gray-700 font-bold mb-2">Nomor Telp</label>
                         <input type="tel" name="no_telp" value="<?= htmlspecialchars($user['no_telp']) ?>"
                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
 
                     <button type="submit" name="update_profile"
                             class="w-full bg-orange-600 text-white py-2 px-4 rounded hover:bg-orange-700 transition">
-                        Update Profile
+                         Ubah Profil
                     </button>
                 </form>
             </div>
             
             <div class="border-t pt-6">
-                <h2 class="text-xl font-bold mb-4">Change Password</h2>
+                <h2 class="text-xl font-bold mb-4">Ubah Password</h2>
                 
                 <form method="POST">
                     <div class="mb-4">
-                        <label class="block text-gray-700 font-bold mb-2">Current Password</label>
+                        <label class="block text-gray-700 font-bold mb-2">Password Saat Ini</label>
                         <input type="password" name="current_password" required
                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block text-gray-700 font-bold mb-2">New Password</label>
+                        <label class="block text-gray-700 font-bold mb-2">Password Baru</label>
                         <input type="password" name="new_password" required minlength="6"
                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
                     
                     <div class="mb-6">
-                        <label class="block text-gray-700 font-bold mb-2">Confirm New Password</label>
+                        <label class="block text-gray-700 font-bold mb-2">Konfirmasi Password Baru</label>
                         <input type="password" name="confirm_password" required minlength="6"
                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
                     
                     <button type="submit" name="update_password"
                             class="w-full bg-orange-600 text-white py-2 px-4 rounded hover:bg-orange-700 transition">
-                        Update Password
+                        Ubah Password
                     </button>
                 </form>
             </div>

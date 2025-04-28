@@ -14,7 +14,7 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-semibold mb-2">Kontak</h3>
-                    <p><i class="fa-brands fa-instagram mr-2"></i>@krauk-krauk</p>
+                    <p><i class="fa-brands fa-instagram mr-2"></i>@eat.kraukkrauk</p>
                 </div>
             </div>
             <div class="border-t border-gray-700 mt-6 pt-4 text-center">

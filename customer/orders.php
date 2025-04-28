@@ -64,9 +64,9 @@ if (!isset($order)) {
         <!-- Order Detail View -->
         <div class="max-w-4xl mx-auto">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold">Order #<?= $order['id'] ?></h1>
+                <h1 class="text-3xl font-bold">Pesanan #<?= $order['id'] ?></h1>
                 <a href="../customer/orders.php" class="text-orange-600 hover:underline inline-flex items-center">
-                    <i class="fas fa-arrow-left mr-2"></i> Back to Orders
+                    <i class="fas fa-arrow-left mr-2"></i> Kembali ke Pesanan
                 </a>
             </div>
             
@@ -80,7 +80,7 @@ if (!isset($order)) {
                                 <p class="text-lg font-bold text-orange-600 mt-1"><?= htmlspecialchars($order['status']) ?></p>
                             </div>
                             <div class="text-right">
-                                <p class="text-gray-600">Order Date</p>
+                                <p class="text-gray-600">Tanggal Pesanan</p>
                                 <p class="font-medium"><?= date('d M Y H:i', strtotime($order['waktu_pemesanan'])) ?></p>
                             </div>
                         </div>
@@ -93,9 +93,9 @@ if (!isset($order)) {
                                     <i clas s="fas fa-info-circle text-blue-500"></i>
                                 </div>
                                 <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-blue-800">Pre-Order Information</h3>
+                                    <h3 class="text-sm font-medium text-blue-800">Informasi Pre Order</h3>
                                     <div class="mt-1 text-sm text-blue-700">
-                                        <p>Your order will be collected from 27-28 April (Pre Order) and will be send on 29 April </p>
+                                        <p>Pesanan anda akan dikumpulkan dari 27-28 April (Pre Order) dan akan dikirimkan pada 29 April </p>
                                     </div>
                                 </div>
                             </div>
@@ -176,12 +176,12 @@ if (!isset($order)) {
                                     </div>
                                     
                                     <div class="mb-4">
-                                        <label for="comment" class="block text-gray-700 mb-2">Comments (Optional)</label>
+                                        <label for="comment" class="block text-gray-700 mb-2">Komentar (Opsional)</label>
                                         <textarea id="comment" name="comment" rows="3" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Share your experience with this order..."></textarea>
                                     </div>
                                     
                                     <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition">
-                                        Submit Feedback
+                                        Kirim Komentar
                                     </button>
                                 </form>
                             <?php endif; ?>
@@ -192,7 +192,7 @@ if (!isset($order)) {
                 <!-- Order Items and Payment Summary -->
                 <div class="md:col-span-2">
                     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                        <h2 class="text-xl font-semibold mb-4">Order Items</h2>
+                        <h2 class="text-xl font-semibold mb-4">Item Pesanan</h2>
                         <div class="space-y-4">
                             <?php foreach ($order_items as $item): ?>
                             <div class="border-b pb-4">
@@ -206,7 +206,7 @@ if (!isset($order)) {
                                 
                                 <?php if (isset($order_addons[$item['id']]) && !empty($order_addons[$item['id']])): ?>
                                 <div class="ml-4 mt-2">
-                                    <p class="text-sm text-gray-600">Add-ons:</p>
+                                    <p class="text-sm text-gray-600">Tambahan:</p>
                                     <ul class="pl-2 text-sm">
                                         <?php 
                                         $addon_total = 0;
@@ -220,7 +220,7 @@ if (!isset($order)) {
                                         <?php endforeach; ?>
                                     </ul>
                                     <div class="text-right text-sm mt-1">
-                                        <span class="font-medium">Add-ons subtotal: Rp <?= number_format($addon_total, 0, ',', '.') ?></span>
+                                        <span class="font-medium">Subtotal Tambahan: Rp <?= number_format($addon_total, 0, ',', '.') ?></span>
                                     </div>
                                 </div>
                                 <?php endif; ?>
@@ -265,7 +265,7 @@ if (!isset($order)) {
                 <div class="md:col-span-1">
                     <!-- Payment Information -->
                     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                        <h2 class="text-xl font-semibold mb-4">Payment</h2>
+                        <h2 class="text-xl font-semibold mb-4">Pembayaran</h2>
                         <div class="space-y-3">
                             <p><span class="text-gray-600 font-medium">Total:</span> 
                                <span class="font-bold">Rp <?= number_format($order['total_harga'], 0, ',', '.') ?></span>
@@ -275,13 +275,13 @@ if (!isset($order)) {
                                 <?php if (!empty($order['bukti_pembayaran'])): ?>
                                 <p class="text-green-600 mb-3"><i class="fas fa-check-circle mr-1"></i> Payment Confirmed</p>
                                 <div>
-                                    <p class="text-gray-600 mb-2">Payment Proof:</p>
+                                    <p class="text-gray-600 mb-2">Bukti Pembayaran:</p>
                                     <img src="../assets/images/uploads/<?= htmlspecialchars($order['bukti_pembayaran']) ?>" 
                                          alt="Payment Proof" 
                                          class="w-full rounded-md border">
                                 </div>
                                 <?php else: ?>
-                                <p class="text-red-600"><i class="fas fa-exclamation-circle mr-1"></i> No payment proof uploaded</p>
+                                <p class="text-red-600"><i class="fas fa-exclamation-circle mr-1"></i> Tidak ada bukti pembayaran terkirim</p>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -289,15 +289,15 @@ if (!isset($order)) {
                     
                     <!-- Delivery Information -->
                     <div class="bg-white rounded-lg shadow-md p-6">
-                        <h2 class="text-xl font-semibold mb-4">Delivery Information</h2>
+                        <h2 class="text-xl font-semibold mb-4">Informasi Pengiriman</h2>
                         <div class="space-y-2">
-                            <p><span class="text-gray-600">Name:</span> <?= htmlspecialchars($order['nama_pemesan']) ?></p>
-                            <p><span class="text-gray-600">Address:</span> <?= nl2br(htmlspecialchars($order['alamat_pemesan'])) ?></p>
+                            <p><span class="text-gray-600">Nama:</span> <?= htmlspecialchars($order['nama_pemesan']) ?></p>
+                            <p><span class="text-gray-600">Alamat:</span> <?= nl2br(htmlspecialchars($order['alamat_pemesan'])) ?></p>
                             
                             <!-- Display notes if available -->
                             <?php if (!empty($order['notes'])): ?>
                             <div class="mt-2 p-3 bg-yellow-50 rounded-md border border-yellow-200">
-                                <p class="font-medium text-gray-700">Special Instructions:</p>
+                                <p class="font-medium text-gray-700">Catatan:</p>
                                 <p class="text-gray-600"><?= nl2br(htmlspecialchars($order['notes'])) ?></p>
                             </div>
                             <?php endif; ?>
@@ -305,7 +305,7 @@ if (!isset($order)) {
                             <!-- Display Map if coordinates are available -->
                             <?php if (!empty($order['latitude']) && !empty($order['longitude'])): ?>
                             <div class="mt-4">
-                                <p class="text-gray-600 mb-2">Delivery Location:</p>
+                                <p class="text-gray-600 mb-2">Lokasi Pengiriman:</p>
                                 <div id="map" class="w-full h-48 rounded-md border"></div>
                             </div>
                             
@@ -334,7 +334,7 @@ if (!isset($order)) {
         </div>
     <?php else: ?>
         <!-- Orders List View -->
-        <h1 class="text-3xl font-bold mb-8">My Orders</h1>
+        <h1 class="text-3xl font-bold mb-8">Pesanan Saya</h1>
         
         <?php if (count($orders) > 0): ?>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -344,7 +344,7 @@ if (!isset($order)) {
                     <a href="?id=<?= $order['id'] ?>">
                         <div class="flex justify-between items-start mb-4">
                             <div>
-                                <h3 class="text-lg font-semibold">Order #<?= $order['id'] ?></h3>
+                                <h3 class="text-lg font-semibold">Pesanan #<?= $order['id'] ?></h3>
                                 <p class="text-sm text-gray-500"><?= date('d M Y H:i', strtotime($order['waktu_pemesanan'])) ?></p>
                             </div>
                             <span class="px-3 py-1 rounded-full text-xs font-medium 
@@ -386,7 +386,7 @@ if (!isset($order)) {
                         </div>
                         <div class="flex justify-between items-center">
                             <div>
-                                <p class="text-sm text-gray-600"><?= $order['total_items'] ?> items</p>
+                                <p class="text-sm text-gray-600"><?= $order['total_items'] ?> item</p>
                                 <p class="font-medium">Rp <?= number_format($order['total_harga'], 0, ',', '.') ?></p>
                             </div>
                             <div class="text-orange-600">
@@ -406,11 +406,11 @@ if (!isset($order)) {
                         if ($conversation) {
                             // If conversation exists, show "Continue Chat" button
                             echo '<a href="chat.php?conversation_id=' . $conversation['id'] . '" class="text-orange-600 hover:underline flex items-center">';
-                            echo '<i class="fas fa-comment mr-1"></i> Continue Chat</a>';
+                            echo '<i class="fas fa-comment mr-1"></i> Lanjurkan Percakapan</a>';
                         } else {
                             // If no conversation, show "Start Chat" button that creates a conversation directly
                             echo '<a href="javascript:void(0)" onclick="startChat(' . $order['id'] . ')" class="text-orange-600 hover:underline flex items-center">';
-                            echo '<i class="fas fa-comment mr-1"></i> Start Chat</a>';
+                            echo '<i class="fas fa-comment mr-1"></i> Mulai Percakapan</a>';
                         }
                         ?>
                         
@@ -424,7 +424,7 @@ if (!isset($order)) {
                             if ($feedback) {
                                 // If feedback exists, show "View Feedback" button
                                 echo '<a href="?id=' . $order['id'] . '#feedback" class="text-green-600 hover:underline flex items-center">';
-                                echo '<i class="fas fa-star mr-1"></i> View Feedback</a>';
+                                echo '<i class="fas fa-star mr-1"></i> Lihat Komentar</a>';
                             } else {
                                 // If no feedback, show "Rate Order" button
                                 echo '<a href="?id=' . $order['id'] . '#feedback" class="text-yellow-600 hover:underline flex items-center">';
@@ -433,7 +433,7 @@ if (!isset($order)) {
                             ?>
                         <?php else: ?>
                             <a href="?id=<?= $order['id'] ?>" class="text-orange-600 hover:underline flex items-center">
-                                <i class="fas fa-eye mr-1"></i> View Details
+                                <i class="fas fa-eye mr-1"></i> Lihat Detail
                             </a>
                         <?php endif; ?>
                     </div>
@@ -445,10 +445,10 @@ if (!isset($order)) {
                 <div class="text-gray-500 mb-4">
                     <i class="fas fa-shopping-bag text-5xl"></i>
                 </div>
-                <h2 class="text-2xl font-semibold mb-4">No orders yet</h2>
-                <p class="text-gray-600 mb-6">You haven't placed any orders yet.</p>
+                <h2 class="text-2xl font-semibold mb-4">Tidak ada pesanan</h2>
+                <p class="text-gray-600 mb-6">Anda belum melakukan pemesanan.</p>
                 <a href="../customer/menu.php" class="bg-orange-600 text-white py-2 px-6 rounded-md hover:bg-orange-700 transition inline-block">
-                    Browse Menu
+                    Lihat Menu
                 </a>
             </div>
         <?php endif; ?>
@@ -525,7 +525,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function startChat(orderId) {
     // Show a modal to get the initial message
     Swal.fire({
-        title: 'Start Conversation',
+        title: 'Mulai Percakapan',
         html: `
             <form id="chatForm">
                 <textarea id="initialMessage" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" 
@@ -533,13 +533,13 @@ function startChat(orderId) {
             </form>
         `,
         showCancelButton: true,
-        confirmButtonText: 'Send Message',
+        confirmButtonText: 'Kirim Pesan',
         confirmButtonColor: '#ea580c',
         cancelButtonText: 'Cancel',
         preConfirm: () => {
             const message = document.getElementById('initialMessage').value.trim();
             if (!message) {
-                Swal.showValidationMessage('Please enter a message');
+                Swal.showValidationMessage('masukan pesan');
                 return false;
             }
             return message;

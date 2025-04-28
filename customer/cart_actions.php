@@ -114,7 +114,7 @@ try {
             $quantity = isset($_GET['quantity']) ? (int)$_GET['quantity'] : 0;
             
             if ($quantity <= 0) {
-                throw new Exception('Quantity must be greater than zero');
+                throw new Exception('Jumlah item harus lebih tinggi dari nol');
             }
             
             // Get menu item details to check stock
@@ -128,11 +128,11 @@ try {
             $menu_item = $stmt->fetch();
             
             if (!$menu_item) {
-                throw new Exception('Menu item not found');
+                throw new Exception('Menu tidak ditemukan');
             }
             
             if ($quantity > $menu_item['stok']) {
-                throw new Exception('Requested quantity exceeds available stock');
+                throw new Exception('Jumlah item melebihi stok');
             }
             
             // Update quantity
@@ -270,7 +270,7 @@ try {
             }
             
             if ($quantity <= 0) {
-                throw new Exception('Quantity must be greater than zero');
+                throw new Exception('Jumlah item harus lebih tinggi dari nol');
             }
             
             // Check if menu item exists and has enough stock
@@ -283,7 +283,7 @@ try {
             }
             
             if ($quantity > $menu_item['stok']) {
-                throw new Exception('Requested quantity exceeds available stock');
+                throw new Exception('Jumlah item melebihi stok');
             }
             
             // Check if item already exists in cart
@@ -301,7 +301,7 @@ try {
                 $new_quantity = $existing_item['jumlah'] + $quantity;
                 
                 if ($new_quantity > $menu_item['stok']) {
-                    throw new Exception('Total quantity exceeds available stock');
+                    throw new Exception('Jumlah item melebihi stok');
                 }
                 
                 $stmt = $pdo->prepare("

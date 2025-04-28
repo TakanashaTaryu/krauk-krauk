@@ -23,10 +23,10 @@ $stmt = $pdo->query("SELECT COUNT(*) as total FROM pesanan WHERE status = 'Diper
 $inTransitOrders = $stmt->fetch()['total'];
 
 // Get financial data
-$stmt = $pdo->query("SELECT SUM(total_harga) as total FROM pesanan WHERE status = 'Telah Sampai'");
+$stmt = $pdo->query("SELECT SUM(total_harga) as total FROM pesanan WHERE status IN ('Diterima','Telah Sampai','Diproses','Diperjalanan','Telah Samapai')");
 $totalRevenue = $stmt->fetch()['total'] ?? 0;
 
-$stmt = $pdo->query("SELECT SUM(total_harga) as total FROM pesanan WHERE status = 'Telah Sampai' AND DATE(waktu_pemesanan) = CURDATE()");
+$stmt = $pdo->query("SELECT SUM(total_harga) as total FROM pesanan WHERE status IN ('Diterima','Telah Sampai','Diproses','Diperjalanan','Telah Samapai') AND DATE(waktu_pemesanan) = CURDATE()");
 $todayRevenue = $stmt->fetch()['total'] ?? 0;
 
 $stmt = $pdo->query("SELECT COUNT(*) as total FROM pesanan WHERE DATE(waktu_pemesanan) = CURDATE()");
@@ -38,7 +38,7 @@ $stmt = $pdo->query("
     FROM pesanan_detail dp
     JOIN menu m ON dp.id_menu = m.id
     JOIN pesanan p ON dp.id_pesanan = p.id
-    WHERE p.status = 'Diproses'
+    WHERE p.status = 'Diterima' OR p.status = 'Diproses' OR p.status = 'Diperjalanan' OR p.status = 'Telah Sampai'
     GROUP BY dp.id_menu
     ORDER BY total_quantity DESC
     LIMIT 5
@@ -64,7 +64,7 @@ $stmt = $pdo->query("
     SELECT DATE_FORMAT(waktu_pemesanan, '%Y-%m') as month,
            SUM(total_harga) as monthly_total
     FROM pesanan
-    WHERE status = 'Telah Sampai'
+    WHERE status = 'Diterima' OR status = 'Diproses' OR status = 'Diperjalanan' OR status = 'Telah Sampai'
     GROUP BY DATE_FORMAT(waktu_pemesanan, '%Y-%m')
     ORDER BY month DESC
 ");

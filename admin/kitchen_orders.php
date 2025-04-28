@@ -38,6 +38,18 @@ $inProcessOrders = $stmt->fetch()['total'];
 
 $stmt = $pdo->query("SELECT COUNT(*) as total FROM pesanan WHERE status = 'Menunggu Konfirmasi'");
 $pendingOrders = $stmt->fetch()['total'];
+
+// Get total menu items ordered with status "Diterima" or "Diproses"
+$stmt = $pdo->query("
+    SELECT m.id, m.nama, SUM(pd.jumlah) as total_ordered
+    FROM pesanan_detail pd
+    JOIN menu m ON pd.id_menu = m.id
+    JOIN pesanan p ON pd.id_pesanan = p.id
+    WHERE p.status IN ('Diterima', 'Diproses')
+    GROUP BY m.id, m.nama
+    ORDER BY total_ordered DESC
+");
+$menuTotals = $stmt->fetchAll();
 ?>
 
 <div class="container mx-auto px-4 py-8">
@@ -73,6 +85,32 @@ $pendingOrders = $stmt->fetch()['total'];
                 </div>
             </div>
         </div>
+    </div>
+    
+    <!-- Total Menu Items to Prepare -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-xl font-bold mb-4">Total Menu Items to Prepare</h2>
+        
+        <?php if (empty($menuTotals)): ?>
+        <div class="text-center py-8">
+            <i class="fas fa-hamburger text-gray-300 text-5xl mb-4"></i>
+            <p class="text-gray-500">No items currently in preparation</p>
+        </div>
+        <?php else: ?>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <?php foreach ($menuTotals as $item): ?>
+            <div class="bg-gray-50 rounded-lg p-4 flex items-center">
+                <div class="bg-orange-100 p-3 rounded-full mr-3">
+                    <i class="fas fa-utensils text-orange-500"></i>
+                </div>
+                <div>
+                    <h3 class="font-medium"><?= htmlspecialchars($item['nama']) ?></h3>
+                    <p class="text-2xl font-bold text-orange-600"><?= $item['total_ordered'] ?></p>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
     </div>
     
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -125,9 +163,9 @@ $pendingOrders = $stmt->fetch()['total'];
                             </div>
                         </td>
                         <td class="py-4 px-4">
-                            <?php if (!empty($order['catatan'])): ?>
+                            <?php if (!empty($order['notes'])): ?>
                             <div class="max-w-xs text-sm bg-yellow-50 p-2 rounded-md border border-yellow-200">
-                                <?= nl2br(htmlspecialchars($order['catatan'] ?? '')) ?>
+                                <?= nl2br(htmlspecialchars($order['notes'] ?? '')) ?>
                             </div>
                             <?php else: ?>
                             <span class="text-gray-400">No notes</span>

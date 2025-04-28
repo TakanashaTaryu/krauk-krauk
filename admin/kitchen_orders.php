@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 }
 
 // Get orders count by status for kitchen
-$stmt = $pdo->query("SELECT COUNT(*) as total FROM pesanan WHERE status IN ('Diterima','Diproses'");
+$stmt = $pdo->query("SELECT COUNT(*) as total FROM pesanan WHERE status IN ('Diterima','Diproses')");
 $inProcessOrders = $stmt->fetch()['total'];
 
 $stmt = $pdo->query("SELECT COUNT(*) as total FROM pesanan WHERE status = 'Menunggu Konfirmasi'");

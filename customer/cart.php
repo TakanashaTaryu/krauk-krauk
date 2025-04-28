@@ -265,7 +265,7 @@ foreach ($cart_items as $item) {
                                id="nama_pemesan" 
                                name="nama_pemesan"
                                class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                               placeholder="Enter your name"
+                               placeholder="Masukan Nama Pemesan"
                                required>
                     </div>
                     <div>
@@ -274,7 +274,7 @@ foreach ($cart_items as $item) {
                                   name="alamat_pemesan"
                                   rows="3" 
                                   class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                  placeholder="Enter your delivery address"
+                                  placeholder="Masukan Alamat Pengiriman"
                                   required></textarea>
                     </div>
                     
@@ -285,7 +285,7 @@ foreach ($cart_items as $item) {
                                   name="notes"
                                   rows="2" 
                                   class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                  placeholder="E.g., No spicy food, house with green gate, etc."></textarea>
+                                  placeholder="Contoh : Jangan Pedas, Banyakin bumbu, Rumah Warna Biru"></textarea>
                     </div>
                     
                     <!-- Location picker -->

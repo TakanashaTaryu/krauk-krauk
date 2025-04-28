@@ -344,7 +344,7 @@ $weeklyRevenue = $stmt->fetchAll();
     </div>
 </div>
 
-<?php require_once '../includes/footer.php'; ?>
+
 
 <!-- Weekly Revenue Chart -->
 <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -420,3 +420,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<?php require_once '../includes/footer.php'; ?>

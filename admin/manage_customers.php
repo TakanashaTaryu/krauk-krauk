@@ -97,7 +97,7 @@ if (!$customer_detail) {
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold"><?= isset($customer_detail) ? 'Customer Details' : 'Manage Customers' ?></h1>
         <a href="<?= isset($customer_detail) ? 'manage_customers.php' : 'dashboard.php' ?>" class="text-orange-600 hover:underline inline-flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Back to <?= isset($customer_detail) ? 'Customers List' : 'Dashboard' ?>
+            <i class="fas fa-arrow-left mr-2"></i> Kembali ke <?= isset($customer_detail) ? 'Customers List' : 'Dashboard' ?>
         </a>
     </div>
     
@@ -107,7 +107,7 @@ if (!$customer_detail) {
             <!-- Customer Information -->
             <div class="md:col-span-1">
                 <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <h2 class="text-xl font-semibold mb-4">Customer Information</h2>
+                    <h2 class="text-xl font-semibold mb-4">Informasi Pelanggan</h2>
                     
                     <div class="space-y-4">
                         <div>
@@ -116,22 +116,22 @@ if (!$customer_detail) {
                         </div>
                         
                         <div>
-                            <p class="text-sm text-gray-600">Phone Number</p>
+                            <p class="text-sm text-gray-600">Nomor Telepon</p>
                             <p class="font-medium"><?= htmlspecialchars($customer_detail['no_telp'] ?? 'Not provided') ?></p>
                         </div>
                         
                         <div>
-                            <p class="text-sm text-gray-600">Registered On</p>
+                            <p class="text-sm text-gray-600">Telah Registrasi Pada</p>
                             <p class="font-medium"><?= date('d M Y H:i', strtotime($customer_detail['created_at'])) ?></p>
                         </div>
                         
                         <div>
-                            <p class="text-sm text-gray-600">Total Orders</p>
+                            <p class="text-sm text-gray-600">Total Pemesanan</p>
                             <p class="font-medium"><?= count($customer_orders) ?></p>
                         </div>
                         
                         <div>
-                            <p class="text-sm text-gray-600">Total Spent</p>
+                            <p class="text-sm text-gray-600">Total Pembelanjaan</p>
                             <p class="font-medium">Rp <?= number_format(array_sum(array_column($customer_orders, 'total_harga')), 0, ',', '.') ?></p>
                         </div>
                     </div>
@@ -146,7 +146,7 @@ if (!$customer_detail) {
                         <input type="hidden" name="customer_id" value="<?= $customer_detail['id'] ?>">
                         
                         <div class="mb-4">
-                            <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                            <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">Password Baru</label>
                             <input 
                                 type="password" 
                                 id="new_password" 
@@ -155,7 +155,7 @@ if (!$customer_detail) {
                                 required
                                 minlength="6"
                             >
-                            <p class="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+                            <p class="text-xs text-gray-500 mt-1">Paling sedikit 6 karakter</p>
                         </div>
                         
                         <div class="flex justify-end">
@@ -170,19 +170,19 @@ if (!$customer_detail) {
             <!-- Order History -->
             <div class="md:col-span-2">
                 <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold mb-4">Order History</h2>
+                    <h2 class="text-xl font-semibold mb-4">Histori Pemesanan</h2>
                     
                     <?php if (count($customer_orders) > 0): ?>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Pemesanan</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -227,7 +227,7 @@ if (!$customer_detail) {
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <a href="../admin/order_details.php?id=<?= $order['id'] ?>" class="text-orange-600 hover:text-orange-900">
-                                                    View Details
+                                                    Lihat Detail
                                                 </a>
                                             </td>
                                         </tr>
@@ -236,7 +236,7 @@ if (!$customer_detail) {
                             </table>
                         </div>
                     <?php else: ?>
-                        <p class="text-gray-500 text-center py-4">No orders found for this customer.</p>
+                        <p class="text-gray-500 text-center py-4">Tidak ada pesanan untuk akun ini.</p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -253,11 +253,11 @@ if (!$customer_detail) {
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orders</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Order</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tlp</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pesanan</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pembelanjaan</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pesanan Terakhir</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -275,11 +275,11 @@ if (!$customer_detail) {
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap space-x-2">
                                 <a href="manage_customers.php?id=<?= $customer['id'] ?>" class="text-blue-600 hover:text-blue-900">
-                                    <i class="fas fa-eye"></i> View
+                                    <i class="fas fa-eye"></i> Lihat
                                 </a>
                                 <button onclick="deleteCustomer(<?= $customer['id'] ?>, <?= $customer['order_count'] ?>)"
                                         class="text-red-600 hover:text-red-900 ml-2">
-                                    <i class="fas fa-trash"></i> Delete
+                                    <i class="fas fa-trash"></i> Hapus
                                 </button>
                             </td>
                         </tr>

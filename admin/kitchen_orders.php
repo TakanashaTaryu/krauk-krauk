@@ -56,7 +56,7 @@ $menuTotals = $stmt->fetchAll();
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">Kitchen Dashboard</h1>
         <a href="dashboard.php" class="text-orange-600 hover:underline inline-flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+            <i class="fas fa-arrow-left mr-2"></i> Kembali ke Halaman Utama
         </a>
     </div>
     
@@ -65,7 +65,7 @@ $menuTotals = $stmt->fetchAll();
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-gray-500">Orders In Preparation</h2>
+                    <h2 class="text-gray-500">Pesanan dalam Persiapan</h2>
                     <p class="text-3xl font-bold text-gray-800"><?= $inProcessOrders ?></p>
                 </div>
                 <div class="bg-orange-100 p-3 rounded-full">
@@ -77,7 +77,7 @@ $menuTotals = $stmt->fetchAll();
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-gray-500">Pending Orders</h2>
+                    <h2 class="text-gray-500">Pesanan Tertunda</h2>
                     <p class="text-3xl font-bold text-gray-800"><?= $pendingOrders ?></p>
                 </div>
                 <div class="bg-yellow-100 p-3 rounded-full">
@@ -89,12 +89,12 @@ $menuTotals = $stmt->fetchAll();
     
     <!-- Total Menu Items to Prepare -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-xl font-bold mb-4">Total Menu Items to Prepare</h2>
+        <h2 class="text-xl font-bold mb-4">Total menu yang ingin dibuat</h2>
         
         <?php if (empty($menuTotals)): ?>
         <div class="text-center py-8">
             <i class="fas fa-hamburger text-gray-300 text-5xl mb-4"></i>
-            <p class="text-gray-500">No items currently in preparation</p>
+            <p class="text-gray-500">Tidak ada menu yang ingin dibuat</p>
         </div>
         <?php else: ?>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -114,24 +114,24 @@ $menuTotals = $stmt->fetchAll();
     </div>
     
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-xl font-bold mb-4">Orders In Preparation</h2>
+        <h2 class="text-xl font-bold mb-4">Pesanan yang igin dibuat</h2>
         
         <?php if (empty($orders)): ?>
         <div class="text-center py-8">
             <i class="fas fa-utensils text-gray-300 text-5xl mb-4"></i>
-            <p class="text-gray-500">No orders currently in preparation</p>
+            <p class="text-gray-500">Tidak ada pesanan yang ingin dibuat</p>
         </div>
         <?php else: ?>
         <div class="overflow-x-auto">
             <table class="min-w-full">
                 <thead>
                     <tr class="bg-gray-100">
-                        <th class="py-3 px-4 text-left">Order ID</th>
-                        <th class="py-3 px-4 text-left">Time</th>
-                        <th class="py-3 px-4 text-left">Customer</th>
+                        <th class="py-3 px-4 text-left">ID Pesanan</th>
+                        <th class="py-3 px-4 text-left">Waktu</th>
+                        <th class="py-3 px-4 text-left">Pelanggan</th>
                         <th class="py-3 px-4 text-left">Items</th>
-                        <th class="py-3 px-4 text-left">Notes</th>
-                        <th class="py-3 px-4 text-left">Actions</th>
+                        <th class="py-3 px-4 text-left">Catatan</th>
+                        <th class="py-3 px-4 text-left">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -168,7 +168,7 @@ $menuTotals = $stmt->fetchAll();
                                 <?= nl2br(htmlspecialchars($order['notes'] ?? '')) ?>
                             </div>
                             <?php else: ?>
-                            <span class="text-gray-400">No notes</span>
+                            <span class="text-gray-400">Tidak ada catatan</span>
                             <?php endif; ?>
                         </td>
                         <td class="py-4 px-4">
@@ -193,17 +193,6 @@ $menuTotals = $stmt->fetchAll();
             </table>
         </div>
         <?php endif; ?>
-    </div>
-    
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-bold mb-4">Kitchen Tips</h2>
-        <ul class="list-disc pl-5 space-y-2">
-            <li>Prioritize orders based on their arrival time (oldest first)</li>
-            <li>Check for any special instructions or notes from customers</li>
-            <li>Ensure all items in an order are prepared before marking it ready</li>
-            <li>Communicate with delivery staff when orders are almost ready</li>
-            <li>Mark orders as "Ready for Delivery" only when they are completely prepared and packaged</li>
-        </ul>
     </div>
 </div>
 

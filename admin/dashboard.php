@@ -99,19 +99,19 @@ $weeklyRevenue = $stmt->fetchAll();
      <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 mb-8 text-white">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
-                <h3 class="text-lg opacity-90 mb-2">Total Revenue</h3>
+                <h3 class="text-lg opacity-90 mb-2">Total Pemasukan</h3>
                 <p class="text-4xl font-bold">Rp <?= number_format($totalRevenue, 0, ',', '.') ?></p>
             </div>
             <div>
-                <h3 class="text-lg opacity-90 mb-2">Today's Revenue</h3>
+                <h3 class="text-lg opacity-90 mb-2">Pemasukan Hari Ini</h3>
                 <p class="text-4xl font-bold">Rp <?= number_format($todayRevenue, 0, ',', '.') ?></p>
             </div>
             <div>
-                <h3 class="text-lg opacity-90 mb-2">This Week Revenue</h3>
+                <h3 class="text-lg opacity-90 mb-2">Pemasukan Minggu Ini</h3>
                 <p class="text-4xl font-bold">Rp <?= number_format($thisWeekRevenue, 0, ',', '.') ?></p>
             </div>
             <div>
-                <h3 class="text-lg opacity-90 mb-2">Weekly Growth</h3>
+                <h3 class="text-lg opacity-90 mb-2">Pertumbuhan Mingguan</h3>
                 <p class="text-4xl font-bold">
                     <?php
                     if (count($weeklyRevenue) >= 2) {
@@ -139,7 +139,7 @@ $weeklyRevenue = $stmt->fetchAll();
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-gray-500">Total Customers</h3>
+                <h3 class="text-gray-500">Banyak Pelanggan</h3>
                 <i class="fas fa-users text-2xl text-orange-500"></i>
             </div>
             <p class="text-3xl font-bold text-gray-800"><?= $totalCustomers ?></p>
@@ -147,7 +147,7 @@ $weeklyRevenue = $stmt->fetchAll();
         
         <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-gray-500">Menu Items</h3>
+                <h3 class="text-gray-500">Banyak Menu</h3>
                 <i class="fas fa-utensils text-2xl text-orange-500"></i>
             </div>
             <p class="text-3xl font-bold text-gray-800"><?= $totalMenuItems ?></p>
@@ -155,7 +155,7 @@ $weeklyRevenue = $stmt->fetchAll();
         
         <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-gray-500">Pending Orders</h3>
+                <h3 class="text-gray-500">Pesanan Tertunda</h3>
                 <i class="fas fa-clock text-2xl text-orange-500"></i>
             </div>
             <p class="text-3xl font-bold text-gray-800"><?= $pendingOrders ?></p>
@@ -163,7 +163,7 @@ $weeklyRevenue = $stmt->fetchAll();
         
         <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-gray-500">Today's Orders</h3>
+                <h3 class="text-gray-500">Pesanan Hari Ini</h3>
                 <i class="fas fa-shopping-bag text-2xl text-orange-500"></i>
             </div>
             <p class="text-3xl font-bold text-gray-800"><?= $todayOrders ?></p>
@@ -171,7 +171,7 @@ $weeklyRevenue = $stmt->fetchAll();
         
         <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-gray-500">In Transit</h3>
+                <h3 class="text-gray-500">Dalam Perjalanan</h3>
                 <i class="fas fa-truck text-2xl text-orange-500"></i>
             </div>
             <p class="text-3xl font-bold text-gray-800"><?= $inTransitOrders ?></p>
@@ -181,7 +181,7 @@ $weeklyRevenue = $stmt->fetchAll();
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <!-- Top Selling Items -->
         <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">Top Selling Items</h2>
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Menu dengan Pesanan Terbanyak</h2>
             <div class="overflow-x-auto">
                 <table class="min-w-full">
                     <thead>
@@ -206,14 +206,14 @@ $weeklyRevenue = $stmt->fetchAll();
 
         <!-- Recent Orders -->
         <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">Recent Orders</h2>
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Pesanan Terbaru</h2>
             <div class="overflow-x-auto">
                 <table class="min-w-full">
                     <thead>
                         <tr class="bg-gray-50">
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Pesanan</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemesan</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         </tr>
@@ -282,23 +282,23 @@ $weeklyRevenue = $stmt->fetchAll();
                 <h3 class="text-xl font-bold text-gray-800">Manage Menu</h3>
                 <i class="fas fa-book-open text-2xl text-orange-500"></i>
             </div>
-            <p class="text-gray-600">Add, edit, or remove menu items</p>
+            <p class="text-gray-600">Menambahkan, mengubah, atau menghapus menu</p>
         </a>
         
         <a href="manage_customers.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Manage Customers</h3>
+                <h3 class="text-xl font-bold text-gray-800">Manage Pelanggan</h3>
                 <i class="fas fa-user-friends text-2xl text-orange-500"></i>
             </div>
-            <p class="text-gray-600">View and manage customer accounts</p>
+            <p class="text-gray-600">Melihat dan mengatur akun pelanggan</p>
         </a>
         
         <a href="manage_orders.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Manage Orders</h3>
+                <h3 class="text-xl font-bold text-gray-800">Manage Pesanan</h3>
                 <i class="fas fa-clipboard-list text-2xl text-orange-500"></i>
             </div>
-            <p class="text-gray-600">View and process customer orders</p>
+            <p class="text-gray-600">Melihat dan memproses semua pesanan</p>
         </a>
         
         <a href="kitchen_orders.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">
@@ -306,7 +306,7 @@ $weeklyRevenue = $stmt->fetchAll();
                 <h3 class="text-xl font-bold text-gray-800">Kitchen Dashboard</h3>
                 <i class="fas fa-utensils text-2xl text-orange-500"></i>
             </div>
-            <p class="text-gray-600">View and manage orders in preparation</p>
+            <p class="text-gray-600">Melihat dan memproses pesanan untuk dapur</p>
         </a>
         
         <a href="driver_orders.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">
@@ -314,16 +314,16 @@ $weeklyRevenue = $stmt->fetchAll();
                 <h3 class="text-xl font-bold text-gray-800">Driver Dashboard</h3>
                 <i class="fas fa-truck text-2xl text-orange-500"></i>
             </div>
-            <p class="text-gray-600">View and manage deliveries in transit</p>
+            <p class="text-gray-600">Melihat dan memproses pesanan untuk diantar</p>
         </a>
         
         <!-- Add this to the Quick Links section in dashboard.php -->
         <a href="manage_payment_methods.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Payment Methods</h3>
+                <h3 class="text-xl font-bold text-gray-800">Metode Pembayaran</h3>
                 <i class="fas fa-credit-card text-2xl text-orange-500"></i>
             </div>
-            <p class="text-gray-600">Manage payment options for customers</p>
+            <p class="text-gray-600">Memanage metode pembayaran untuk pelanggan</p>
         </a>
 
         <a href="manage_qris.php" class="bg-white rounded-lg shadow-lg p-6 hover:bg-orange-50 transition-colors duration-200">
@@ -331,7 +331,7 @@ $weeklyRevenue = $stmt->fetchAll();
                 <h3 class="text-xl font-bold text-gray-800">Manage Qris</h3>
                 <i class="fas fa-qrcode text-2xl text-orange-500"></i>
             </div>
-            <p class="text-gray-600">Manage The Qris Payment</p>
+            <p class="text-gray-600">Manage metode pembayaran QRIS</p>
         </a>
         
         <!-- Add Manage Admin link -->
@@ -340,7 +340,7 @@ $weeklyRevenue = $stmt->fetchAll();
                 <h3 class="text-xl font-bold text-gray-800">Manage Admin</h3>
                 <i class="fas fa-user-shield text-2xl text-orange-500"></i>
             </div>
-            <p class="text-gray-600">Add, edit, or remove admin accounts</p>
+            <p class="text-gray-600">Menambahkan, mengubah, atau menghapus akun admin</p>
         </a>
     </div>
 </div>
@@ -349,7 +349,7 @@ $weeklyRevenue = $stmt->fetchAll();
 
 <!-- Weekly Revenue Chart -->
 <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-    <h2 class="text-xl font-bold mb-4 text-gray-800">Weekly Revenue</h2>
+    <h2 class="text-xl font-bold mb-4 text-gray-800">Pemasukan Mingguan</h2>
     <div class="h-64">
         <canvas id="weeklyRevenueChart"></canvas>
     </div>
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ?>
         ],
         datasets: [{
-            label: 'Weekly Revenue',
+            label: 'Pemasukan Mingguan',
             data: [
                 <?php 
                 $data = [];
@@ -414,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return 'Revenue: Rp ' + context.raw.toLocaleString('id-ID');
+                            return 'Pemasukan: Rp ' + context.raw.toLocaleString('id-ID');
                         }
                     }
                 }

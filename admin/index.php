@@ -17,7 +17,7 @@
         ?>
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500">Unread Messages</p>
+                <p class="text-gray-500">Pesan Belum Terbaca</p>
                 <h3 class="text-2xl font-bold"><?= $unread_messages ?></h3>
             </div>
             <div class="p-3 rounded-full bg-orange-100 text-orange-600">

@@ -95,13 +95,13 @@ $status_options = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan'
 
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold">Manage Orders</h1>
+        <h1 class="text-3xl font-bold">Manage Pesanan</h1>
         <div class="flex space-x-2">
             <button onclick="exportToExcel()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                <i class="fas fa-file-excel mr-2"></i>Export to Excel
+                <i class="fas fa-file-excel mr-2"></i>Export ke Excel
             </button>
             <button onclick="printOrders()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                <i class="fas fa-print mr-2"></i>Print
+                <i class="fas fa-print mr-2"></i>Cetak
             </button>
         </div>
     </div>
@@ -110,25 +110,25 @@ $status_options = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan'
     <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
         <form method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Cari</label>
                 <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" 
                        class="w-full border rounded-md px-3 py-2" 
                        placeholder="Search...">
             </div>
             
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Search By</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Cari Sebagai</label>
                 <select name="searchBy" class="w-full border rounded-md px-3 py-2">
-                    <option value="email" <?= $searchBy === 'email' ? 'selected' : '' ?>>Customer Email</option>
-                    <option value="amount" <?= $searchBy === 'amount' ? 'selected' : '' ?>>Amount</option>
-                    <option value="id" <?= $searchBy === 'id' ? 'selected' : '' ?>>Order ID</option>
+                    <option value="email" <?= $searchBy === 'email' ? 'selected' : '' ?>>Email Pelanggan</option>
+                    <option value="amount" <?= $searchBy === 'amount' ? 'selected' : '' ?>>Jumlah</option>
+                    <option value="id" <?= $searchBy === 'id' ? 'selected' : '' ?>>ID Pesanan</option>
                 </select>
             </div>
             
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                 <select name="status" class="w-full border rounded-md px-3 py-2">
-                    <option value="">All Status</option>
+                    <option value="">Semua Status</option>
                     <?php foreach ($status_options as $status): ?>
                         <option value="<?= $status ?>" <?= $status_filter === $status ? 'selected' : '' ?>>
                             <?= $status ?>
@@ -138,20 +138,20 @@ $status_options = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan'
             </div>
             
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">From Date</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
                 <input type="date" name="date_from" value="<?= htmlspecialchars($date_from) ?>" 
                        class="w-full border rounded-md px-3 py-2">
             </div>
             
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">To Date</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Hingga Tanggal</label>
                 <input type="date" name="date_to" value="<?= htmlspecialchars($date_to) ?>" 
                        class="w-full border rounded-md px-3 py-2">
             </div>
             
             <div class="flex items-end space-x-2">
                 <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
-                    <i class="fas fa-search mr-2"></i>Search
+                    <i class="fas fa-search mr-2"></i>Cari
                 </button>
                 <a href="manage_orders.php" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
                     <i class="fas fa-redo mr-2"></i>Reset
@@ -164,26 +164,26 @@ $status_options = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan'
     <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-blue-50 p-4 rounded-lg">
-                <h3 class="text-lg font-semibold text-blue-800">Total Orders</h3>
+                <h3 class="text-lg font-semibold text-blue-800">Total Pesanan</h3>
                 <p class="text-2xl font-bold text-blue-600"><?= count($orders) ?></p>
             </div>
             <?php
-            $stmt = $pdo->query("SELECT SUM(total_harga) as total FROM pesanan WHERE status = 'Telah Sampai'");
+            $stmt = $pdo->query("SELECT SUM(total_harga) as total FROM pesanan WHERE status IN ('Diterima','Telah Sampai','Diproses','Diperjalanan','Telah Samapai')");
             $totalRevenue = $stmt->fetch()['total'] ?? 0;
             //$total_revenue = array_sum(array_column($orders, 'total_harga'));
             $pending_orders = count(array_filter($orders, fn($o) => $o['status'] === 'Menunggu Konfirmasi'));
             $processing_orders = count(array_filter($orders, fn($o) => $o['status'] === 'Diproses'));
             ?>
             <div class="bg-green-50 p-4 rounded-lg">
-                <h3 class="text-lg font-semibold text-green-800">Total Revenue</h3>
+                <h3 class="text-lg font-semibold text-green-800">Total Keuntungan</h3>
                 <p class="text-2xl font-bold text-green-600">Rp <?= number_format($totalRevenue, 0, ',', '.') ?></p>
             </div>
             <div class="bg-yellow-50 p-4 rounded-lg">
-                <h3 class="text-lg font-semibold text-yellow-800">Pending Orders</h3>
+                <h3 class="text-lg font-semibold text-yellow-800">Pesanan Tertunda</h3>
                 <p class="text-2xl font-bold text-yellow-600"><?= $pending_orders ?></p>
             </div>
             <div class="bg-purple-50 p-4 rounded-lg">
-                <h3 class="text-lg font-semibold text-purple-800">Processing Orders</h3>
+                <h3 class="text-lg font-semibold text-purple-800">Pesanan Diproses</h3>
                 <p class="text-2xl font-bold text-purple-600"><?= $processing_orders ?></p>
             </div>
         </div>
@@ -195,13 +195,13 @@ $status_options = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan'
             <table class="min-w-full">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Pesanan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Update Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Time</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubah Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu Pesanan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -296,7 +296,7 @@ $status_options = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan'
 <div id="detailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="bg-white rounded-lg max-w-2xl mx-auto mt-20 p-6">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold">Order Details</h2>
+            <h2 class="text-2xl font-bold">Detail Pesanan</h2>
             <button onclick="hideDetailsModal()" class="text-gray-500 hover:text-gray-700">
                 <i class="fas fa-times"></i>
             </button>
@@ -321,13 +321,13 @@ $status_options = ['Menunggu Konfirmasi', 'Diterima', 'Diproses', 'Diperjalanan'
 <script>
 function updateStatus(orderId, status) {
     Swal.fire({
-        title: 'Update Order Status',
-        text: `Are you sure you want to update this order to "${status}"?`,
+        title: 'Update Status Pesanan',
+        text: `Apakah kamu ingin mengubah status ke "${status}"?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, update it!'
+        confirmButtonText: 'Iya, Ubah!'
     }).then((result) => {
         if (result.isConfirmed) {
             const form = document.createElement('form');
@@ -345,13 +345,13 @@ function updateStatus(orderId, status) {
 
 function deleteOrder(orderId) {
     Swal.fire({
-        title: 'Delete Order',
-        text: "This action cannot be undone. Are you sure?",
+        title: 'Hapus Pesanan',
+        text: "Aksi ini tidak dapat kembali, Lanjutkan?",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonText: 'Iya, hapus!'
     }).then((result) => {
         if (result.isConfirmed) {
             const form = document.createElement('form');

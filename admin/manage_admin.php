@@ -48,15 +48,15 @@ $users = $stmt->fetchAll();
 
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Manage Admin Privileges</h1>
+        <h1 class="text-3xl font-bold">Manage Akses Admin</h1>
         <a href="dashboard.php" class="text-orange-600 hover:underline inline-flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+            <i class="fas fa-arrow-left mr-2"></i> Kembali ke Menu Utama
         </a>
     </div>
     
     <!-- User List -->
     <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold mb-4">User Accounts</h2>
+        <h2 class="text-xl font-semibold mb-4">Akun Pengguna</h2>
         
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -64,10 +64,10 @@ $users = $stmt->fetchAll();
                     <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No Telp</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dibuat</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -85,7 +85,7 @@ $users = $stmt->fetchAll();
                                         </span>
                                     <?php else: ?>
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                            Customer
+                                            Pelanggan
                                         </span>
                                     <?php endif; ?>
                                 </td>
@@ -95,20 +95,20 @@ $users = $stmt->fetchAll();
                                            class="<?= $user['admin_value'] ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900' ?>"
                                            onclick="return confirm('Are you sure you want to <?= $user['admin_value'] ? 'remove' : 'grant' ?> admin privileges for this user?')">
                                             <?php if ($user['admin_value']): ?>
-                                                <i class="fas fa-user-minus"></i> Disable Admin
+                                                <i class="fas fa-user-minus"></i> Jadikan Pelanggan
                                             <?php else: ?>
-                                                <i class="fas fa-user-plus"></i> Enable Admin
+                                                <i class="fas fa-user-plus"></i> Jadikan Admin
                                             <?php endif; ?>
                                         </a>
                                     <?php else: ?>
-                                        <span class="text-gray-400"><i class="fas fa-user-check"></i> Current User</span>
+                                        <span class="text-gray-400"><i class="fas fa-user-check"></i> Akun Saat Ini</span>
                                     <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">No user accounts found</td>
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">Tidak ada pengguna</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

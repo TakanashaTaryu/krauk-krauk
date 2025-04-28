@@ -65,13 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 <div class="container mx-auto px-4 py-8">
     <!-- Add this near the top of the order details page, in the order header section -->
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Order #<?= $order['id'] ?></h1>
+        <h1 class="text-3xl font-bold">Pesanan #<?= $order['id'] ?></h1>
         <div class="flex space-x-4">
             <a href="chat.php?order_id=<?= $order['id'] ?>" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition flex items-center">
-                <i class="fas fa-comment mr-2"></i> Chat with Customer
+                <i class="fas fa-comment mr-2"></i> Chat dengan Pelanggan
             </a>
             <a href="manage_orders.php" class="text-orange-600 hover:underline inline-flex items-center">
-                <i class="fas fa-arrow-left mr-2"></i> Back to Orders
+                <i class="fas fa-arrow-left mr-2"></i> Kembali ke Daftar Pesanan
             </a>
         </div>
     </div>
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                         <p class="text-lg font-bold text-orange-600 mt-1"><?= htmlspecialchars($order['status']) ?></p>
                     </div>
                     <div class="text-right">
-                        <p class="text-gray-600">Order Date</p>
+                        <p class="text-gray-600">Tanggal Pesanan</p>
                         <p class="font-medium"><?= date('d M Y H:i', strtotime($order['waktu_pemesanan'])) ?></p>
                     </div>
                 </div>
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
         ?>
         <div class="lg:col-span-3">
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold mb-4">Customer Feedback</h2>
+                <h2 class="text-xl font-semibold mb-4">Komentar Pelanggan</h2>
                 <div class="mb-4">
                     <div class="flex items-center mb-2">
                         <div class="flex text-yellow-400">
@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                     <?php if (!empty($feedback['komentar'])): ?>
                         <p class="text-gray-700"><?= nl2br(htmlspecialchars($feedback['komentar'])) ?></p>
                     <?php else: ?>
-                        <p class="text-gray-500 italic">No comments provided</p>
+                        <p class="text-gray-500 italic">Tidak ada komentar tersedia</p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -127,17 +127,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
         <!-- Customer Information -->
         <div class="lg:col-span-1">
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-4">Customer Information</h2>
+                <h2 class="text-xl font-semibold mb-4">Informasi Pelanggan</h2>
                 <div class="space-y-2">
                     <p><span class="text-gray-600">Email:</span> <?= htmlspecialchars($order['email']) ?></p>
-                    <p><span class="text-gray-600">Phone:</span> <?= htmlspecialchars($order['no_telp'] ?? 'Not provided') ?></p>
-                    <p><span class="text-gray-600">Recipient:</span> <?= htmlspecialchars($order['nama_pemesan']) ?></p>
-                    <p><span class="text-gray-600">Address:</span> <?= nl2br(htmlspecialchars($order['alamat_pemesan'])) ?></p>
+                    <p><span class="text-gray-600">No Tlp:</span> <?= htmlspecialchars($order['no_telp'] ?? 'Not provided') ?></p>
+                    <p><span class="text-gray-600">Nama Pemesan:</span> <?= htmlspecialchars($order['nama_pemesan']) ?></p>
+                    <p><span class="text-gray-600">Alamat:</span> <?= nl2br(htmlspecialchars($order['alamat_pemesan'])) ?></p>
                     
                     <!-- Display notes if available -->
                     <?php if (!empty($order['notes'])): ?>
                     <div class="mt-3 p-3 bg-yellow-50 rounded-md border border-yellow-200">
-                        <p class="font-medium text-gray-700 mb-1">Special Instructions:</p>
+                        <p class="font-medium text-gray-700 mb-1">Catatan:</p>
                         <p class="text-gray-600"><?= nl2br(htmlspecialchars($order['notes'])) ?></p>
                     </div>
                     <?php endif; ?>
@@ -145,12 +145,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                     <!-- Display Map if coordinates are available -->
                     <?php if (!empty($order['latitude']) && !empty($order['longitude'])): ?>
                     <div class="mt-4">
-                        <h4 class="font-semibold mb-2">Delivery Location</h4>
+                        <h4 class="font-semibold mb-2">Lokasi Pengiriman</h4>
                         <div id="map" class="w-full h-64 rounded-md border mb-2"></div>
                         <a href="https://www.google.com/maps/dir/?api=1&destination=<?= $order['latitude'] ?>,<?= $order['longitude'] ?>" 
                            target="_blank" 
                            class="text-blue-600 hover:underline inline-flex items-center">
-                            <i class="fas fa-directions mr-1"></i> Get Directions
+                            <i class="fas fa-directions mr-1"></i> Dapatkan Rute
                         </a>
                     </div>
                     
@@ -177,19 +177,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
             
             <!-- Payment Information -->
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold mb-4">Payment Information</h2>
+                <h2 class="text-xl font-semibold mb-4">Informasi Pembayaran</h2>
                 <div class="space-y-4">
-                    <p><span class="text-gray-600">Total Amount:</span> Rp <?= number_format($order['total_harga'], 0, ',', '.') ?></p>
+                    <p><span class="text-gray-600">Total Pembelian:</span> Rp <?= number_format($order['total_harga'], 0, ',', '.') ?></p>
                     
                     <?php if ($order['bukti_pembayaran']): ?>
                     <div>
-                        <p class="text-gray-600 mb-2">Payment Proof:</p>
+                        <p class="text-gray-600 mb-2">Bukti Pembayaran:</p>
                         <img src="../assets/images/uploads/<?= htmlspecialchars($order['bukti_pembayaran']) ?>" 
                              alt="Payment Proof" 
                              class="w-full rounded-md border">
                     </div>
                     <?php else: ?>
-                    <p class="text-red-600">No payment proof uploaded</p>
+                    <p class="text-red-600">Tidak ada bukti pembayaran terkirim</p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -204,8 +204,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                         <thead>
                             <tr class="bg-gray-100">
                                 <th class="py-3 px-4 text-left">Item</th>
-                                <th class="py-3 px-4 text-right">Price</th>
-                                <th class="py-3 px-4 text-right">Quantity</th>
+                                <th class="py-3 px-4 text-right">Harga</th>
+                                <th class="py-3 px-4 text-right">Jumlah</th>
                                 <th class="py-3 px-4 text-right">Subtotal</th>
                             </tr>
                         </thead>
@@ -223,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                                     
                                     <?php if (isset($order_addons[$item['id']]) && !empty($order_addons[$item['id']])): ?>
                                     <div class="mt-2">
-                                        <p class="text-sm text-gray-600">Add-ons:</p>
+                                        <p class="text-sm text-gray-600">Tambahan:</p>
                                         <ul class="pl-4 text-sm">
                                             <?php 
                                             $addon_total = 0;
@@ -247,7 +247,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                                     
                                     <?php if (isset($order_addons[$item['id']]) && !empty($order_addons[$item['id']])): ?>
                                     <div class="text-sm text-gray-600 mt-1">
-                                        + Rp <?= number_format($addon_total, 0, ',', '.') ?> (add-ons)
+                                        + Rp <?= number_format($addon_total, 0, ',', '.') ?> (Tambahan)
                                     </div>
                                     <div class="font-medium mt-1 pt-1 border-t">
                                         Rp <?= number_format($item_subtotal + $addon_total, 0, ',', '.') ?>
@@ -277,7 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
             
             <!-- Update Status Form -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-4">Update Status</h2>
+                <h2 class="text-xl font-semibold mb-4">Ubah Status</h2>
                 <form method="POST" class="mt-4">
                     <div class="flex flex-wrap items-center gap-4">
                         <div class="w-full md:w-auto">
@@ -292,7 +292,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                         <button type="submit" 
                                 name="update_status" 
                                 class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition">
-                            Update Status
+                            Ubah Status
                         </button>
                     </div>
                 </form>
@@ -338,7 +338,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start_conversation'])
 <div id="chatModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold">Start Conversation</h3>
+            <h3 class="text-xl font-bold">Mulai Konversasi</h3>
             <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
                 <i class="fas fa-times"></i>
             </button>
@@ -346,13 +346,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['start_conversation'])
         
         <form method="POST">
             <div class="mb-4">
-                <label class="block text-gray-700 mb-2">Initial Message</label>
+                <label class="block text-gray-700 mb-2">Pesan Awal</label>
                 <textarea name="initial_message" rows="4" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Type your message to the customer..."></textarea>
             </div>
             
             <div class="flex justify-end">
-                <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-md mr-2">Cancel</button>
-                <button type="submit" name="start_conversation" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">Send Message</button>
+                <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-md mr-2">Batal</button>
+                <button type="submit" name="start_conversation" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">Kirim Pesan</button>
             </div>
         </form>
     </div>

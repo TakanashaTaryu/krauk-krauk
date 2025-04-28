@@ -37,29 +37,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">Driver Dashboard</h1>
         <a href="dashboard.php" class="text-orange-600 hover:underline inline-flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+            <i class="fas fa-arrow-left mr-2"></i> Kembali ke Menu Utama
         </a>
     </div>
     
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-xl font-bold mb-4">Orders In Transit</h2>
+        <h2 class="text-xl font-bold mb-4">Pesanan Dalam Perjalanan</h2>
         
         <?php if (empty($orders)): ?>
         <div class="text-center py-8">
             <i class="fas fa-truck text-gray-300 text-5xl mb-4"></i>
-            <p class="text-gray-500">No orders currently in transit</p>
+            <p class="text-gray-500">Tidak ada pesanan terbaru yang sedang dalam perjalanan</p>
         </div>
         <?php else: ?>
         <div class="overflow-x-auto">
             <table class="min-w-full">
                 <thead>
                     <tr class="bg-gray-100">
-                        <th class="py-3 px-4 text-left">Order ID</th>
-                        <th class="py-3 px-4 text-left">Customer</th>
-                        <th class="py-3 px-4 text-left">Delivery Address</th>
+                        <th class="py-3 px-4 text-left">ID Pesanan</th>
+                        <th class="py-3 px-4 text-left">Pelanggan</th>
+                        <th class="py-3 px-4 text-left">Alamat Pengiriman</th>
                         <th class="py-3 px-4 text-left">Items</th>
                         <th class="py-3 px-4 text-left">Total</th>
-                        <th class="py-3 px-4 text-left">Actions</th>
+                        <th class="py-3 px-4 text-left">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                                 <a href="https://www.google.com/maps/dir/?api=1&destination=<?= $order['latitude'] ?>,<?= $order['longitude'] ?>" 
                                    target="_blank" 
                                    class="text-blue-600 hover:underline inline-flex items-center mt-2">
-                                    <i class="fas fa-directions mr-1"></i> Get Directions
+                                    <i class="fas fa-directions mr-1"></i> Dapatkan Rute
                                 </a>
                                 <?php endif; ?>
                             </div>
@@ -113,17 +113,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
             </table>
         </div>
         <?php endif; ?>
-    </div>
-    
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-bold mb-4">Delivery Tips</h2>
-        <ul class="list-disc pl-5 space-y-2">
-            <li>Always verify the customer's identity before handing over the order</li>
-            <li>Check that all items are included in the package before leaving</li>
-            <li>Use the map directions for the most efficient route</li>
-            <li>Mark orders as "Delivered" only after successful handover</li>
-            <li>Contact the restaurant if you encounter any issues during delivery</li>
-        </ul>
     </div>
 </div>
 

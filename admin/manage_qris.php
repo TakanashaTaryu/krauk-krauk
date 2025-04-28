@@ -42,18 +42,18 @@ $qris_static = $stmt->fetch(PDO::FETCH_COLUMN) ?: '';
 
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Manage QRIS Payment</h1>
+        <h1 class="text-3xl font-bold">Manage Pemyaran QRIS</h1>
         <a href="dashboard.php" class="text-orange-600 hover:underline inline-flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+            <i class="fas fa-arrow-left mr-2"></i> Kembali ke Halaman Utama
         </a>
     </div>
     
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 class="text-xl font-semibold mb-4">QRIS Configuration</h2>
+        <h2 class="text-xl font-semibold mb-4">Konfigurasi QRIS</h2>
         
         <form action="manage_qris.php" method="POST">
             <div class="mb-4">
-                <label for="qris_code" class="block text-sm font-medium text-gray-700 mb-1">Static QRIS Code</label>
+                <label for="qris_code" class="block text-sm font-medium text-gray-700 mb-1">Kode QRIS Statik</label>
                 <textarea 
                     id="qris_code" 
                     name="qris_code" 
@@ -62,12 +62,12 @@ $qris_static = $stmt->fetch(PDO::FETCH_COLUMN) ?: '';
                     placeholder="Paste your static QRIS code here"
                     required
                 ><?= htmlspecialchars($qris_static) ?></textarea>
-                <p class="text-sm text-gray-500 mt-1">Enter the full static QRIS code from your payment provider</p>
+                <p class="text-sm text-gray-500 mt-1">Masukan kode full pembayaran QRIS statik</p>
             </div>
             
             <div class="flex justify-end">
                 <button type="submit" name="upload_qris" class="bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition">
-                    Save QRIS Configuration
+                    Simpan konfigurasi QRIS
                 </button>
             </div>
         </form>
@@ -79,7 +79,7 @@ $qris_static = $stmt->fetch(PDO::FETCH_COLUMN) ?: '';
         
         <div class="flex flex-col md:flex-row items-center gap-6">
             <div class="text-center">
-                <p class="mb-2 font-medium">Static QRIS Code</p>
+                <p class="mb-2 font-medium">Kode QRIS Statik</p>
                 <div id="static-qr-container" class="bg-white p-4 inline-block rounded-lg border">
                     <!-- QR code will be generated here -->
                     <img id="static-qr-image" src="../assets/images/loading.gif" alt="Static QRIS Code" width="200" height="200">
@@ -87,7 +87,7 @@ $qris_static = $stmt->fetch(PDO::FETCH_COLUMN) ?: '';
             </div>
             
             <div class="text-center">
-                <p class="mb-2 font-medium">Dynamic QRIS Preview (Rp 10.000)</p>
+                <p class="mb-2 font-medium">Preview QRIS Dinamis (Rp 10.000)</p>
                 <div id="dynamic-qr-container" class="bg-white p-4 inline-block rounded-lg border">
                     <!-- Dynamic QR code will be generated here -->
                     <img id="dynamic-qr-image" src="../assets/images/loading.gif" alt="Dynamic QRIS Code" width="200" height="200">

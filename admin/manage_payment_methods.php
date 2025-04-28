@@ -120,9 +120,9 @@ $payment_methods = $stmt->fetchAll();
 
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Manage Payment Methods</h1>
+        <h1 class="text-3xl font-bold text-gray-800">Manage Metode Pembayaran</h1>
         <button type="button" onclick="openAddModal()" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">
-            <i class="fas fa-plus mr-2"></i> Add Payment Method
+            <i class="fas fa-plus mr-2"></i> Tambahkan Metode Pembayaran
         </button>
     </div>
     
@@ -132,17 +132,17 @@ $payment_methods = $stmt->fetchAll();
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logo</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account Number</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Akun</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Akun</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 <?php if (empty($payment_methods)): ?>
                 <tr>
-                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">No payment methods found</td>
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">Tidak ada metode pembayaran</td>
                 </tr>
                 <?php else: ?>
                     <?php foreach ($payment_methods as $method): ?>
@@ -166,10 +166,10 @@ $payment_methods = $stmt->fetchAll();
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button type="button" onclick="openEditModal(<?= htmlspecialchars(json_encode($method)) ?>)" class="text-blue-600 hover:text-blue-900 mr-3">
-                                <i class="fas fa-edit"></i> Edit
+                                <i class="fas fa-edit"></i> Ubah
                             </button>
                             <button type="button" onclick="confirmDelete(<?= $method['id'] ?>, '<?= htmlspecialchars($method['name']) ?>')" class="text-red-600 hover:text-red-900">
-                                <i class="fas fa-trash"></i> Delete
+                                <i class="fas fa-trash"></i> Hapus
                             </button>
                         </td>
                     </tr>
@@ -183,39 +183,39 @@ $payment_methods = $stmt->fetchAll();
     <div id="addModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium">Add Payment Method</h3>
+                <h3 class="text-lg font-medium">Tambah Metode Pembayaran</h3>
                 <button type="button" onclick="closeAddModal()" class="text-gray-400 hover:text-gray-500">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <form action="" method="POST" enctype="multipart/form-data">
                 <div class="mb-4">
-                    <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Nama</label>
                     <input type="text" name="name" id="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50">
                 </div>
                 <div class="mb-4">
-                    <label for="account_number" class="block text-sm font-medium text-gray-700">Account Number</label>
+                    <label for="account_number" class="block text-sm font-medium text-gray-700">Nomor Akun</label>
                     <input type="text" name="account_number" id="account_number" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50">
                 </div>
                 <div class="mb-4">
-                    <label for="account_name" class="block text-sm font-medium text-gray-700">Account Name</label>
+                    <label for="account_name" class="block text-sm font-medium text-gray-700">Nama Akun</label>
                     <input type="text" name="account_name" id="account_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50">
                 </div>
                 <div class="mb-4">
-                    <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                    <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi</label>
                     <textarea name="description" id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50"></textarea>
                 </div>
                 <div class="mb-4">
-                    <label for="logo" class="block text-sm font-medium text-gray-700">Logo (Optional)</label>
+                    <label for="logo" class="block text-sm font-medium text-gray-700">Logo (Opsional)</label>
                     <input type="file" name="logo" id="logo" accept="image/*" class="mt-1 block w-full">
                 </div>
                 <div class="mb-4 flex items-center">
                     <input type="checkbox" name="is_active" id="is_active" checked class="rounded border-gray-300 text-orange-600 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50">
-                    <label for="is_active" class="ml-2 block text-sm text-gray-700">Active</label>
+                    <label for="is_active" class="ml-2 block text-sm text-gray-700">Aktif</label>
                 </div>
                 <div class="flex justify-end">
-                    <button type="button" onclick="closeAddModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-300">Cancel</button>
-                    <button type="submit" name="add_payment_method" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">Add Payment Method</button>
+                    <button type="button" onclick="closeAddModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-300">Batal</button>
+                    <button type="submit" name="add_payment_method" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">Tambah Metode Pembayaran</button>
                 </div>
             </form>
         </div>
@@ -225,7 +225,7 @@ $payment_methods = $stmt->fetchAll();
     <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium">Edit Payment Method</h3>
+                <h3 class="text-lg font-medium">Ubah Metode Pembayaran</h3>
                 <button type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-500">
                     <i class="fas fa-times"></i>
                 </button>
@@ -233,36 +233,36 @@ $payment_methods = $stmt->fetchAll();
             <form action="" method="POST" enctype="multipart/form-data" id="editForm">
                 <input type="hidden" name="id" id="edit_id">
                 <div class="mb-4">
-                    <label for="edit_name" class="block text-sm font-medium text-gray-700">Name</label>
+                    <label for="edit_name" class="block text-sm font-medium text-gray-700">Nama</label>
                     <input type="text" name="name" id="edit_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50">
                 </div>
                 <div class="mb-4">
-                    <label for="edit_account_number" class="block text-sm font-medium text-gray-700">Account Number</label>
+                    <label for="edit_account_number" class="block text-sm font-medium text-gray-700">Nomor Akun</label>
                     <input type="text" name="account_number" id="edit_account_number" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50">
                 </div>
                 <div class="mb-4">
-                    <label for="edit_account_name" class="block text-sm font-medium text-gray-700">Account Name</label>
+                    <label for="edit_account_name" class="block text-sm font-medium text-gray-700">Nama Akun</label>
                     <input type="text" name="account_name" id="edit_account_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50">
                 </div>
                 <div class="mb-4">
-                    <label for="edit_description" class="block text-sm font-medium text-gray-700">Description</label>
+                    <label for="edit_description" class="block text-sm font-medium text-gray-700">Deskripsi</label>
                     <textarea name="description" id="edit_description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50"></textarea>
                 </div>
                 <div class="mb-4">
-                    <label for="edit_logo" class="block text-sm font-medium text-gray-700">Logo (Optional)</label>
+                    <label for="edit_logo" class="block text-sm font-medium text-gray-700">Logo (Opsional)</label>
                     <input type="file" name="logo" id="edit_logo" accept="image/*" class="mt-1 block w-full">
                     <div id="current_logo_container" class="mt-2 hidden">
-                        <p class="text-sm text-gray-500">Current logo:</p>
+                        <p class="text-sm text-gray-500">Logo Saat ini:</p>
                         <img id="current_logo" src="" alt="Current Logo" class="h-10 mt-1">
                     </div>
                 </div>
                 <div class="mb-4 flex items-center">
                     <input type="checkbox" name="is_active" id="edit_is_active" class="rounded border-gray-300 text-orange-600 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50">
-                    <label for="edit_is_active" class="ml-2 block text-sm text-gray-700">Active</label>
+                    <label for="edit_is_active" class="ml-2 block text-sm text-gray-700">Aktif</label>
                 </div>
                 <div class="flex justify-end">
-                    <button type="button" onclick="closeEditModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-300">Cancel</button>
-                    <button type="submit" name="update_payment_method" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">Update Payment Method</button>
+                    <button type="button" onclick="closeEditModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-300">Batal</button>
+                    <button type="submit" name="update_payment_method" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">Ubah Metode Pembayaran</button>
                 </div>
             </form>
         </div>
@@ -275,15 +275,15 @@ $payment_methods = $stmt->fetchAll();
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                     <i class="fas fa-exclamation-triangle text-red-600"></i>
                 </div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-2">Delete Payment Method</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-2">Hapus Metode Pembayaran</h3>
                 <div class="mt-2 px-7 py-3">
                     <p class="text-sm text-gray-500" id="delete_confirmation_text"></p>
                 </div>
                 <div class="flex justify-center mt-3">
                     <form action="" method="POST">
                         <input type="hidden" name="id" id="delete_id">
-                        <button type="button" onclick="closeDeleteModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-300">Cancel</button>
-                        <button type="submit" name="delete_payment_method" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">Delete</button>
+                        <button type="button" onclick="closeDeleteModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-300">Batal</button>
+                        <button type="submit" name="delete_payment_method" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">Hapus</button>
                     </form>
                 </div>
             </div>

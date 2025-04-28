@@ -166,7 +166,7 @@ foreach ($menu_items as $item) {
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">Manage Menu</h1>
         <button onclick="showAddModal()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-            Add New Item
+            Tambahkan item baru
         </button>
     </div>
     
@@ -192,11 +192,11 @@ foreach ($menu_items as $item) {
                     <p>Stock: <?= $item['stok'] ?></p>
                     <p class="text-green-600">Stock Terjual: <?= $stock_terjual ?></p>
                 </div>
-                <p class="mb-4">Price: Rp<?= number_format($item['harga'], 0, ',', '.') ?></p>
+                <p class="mb-4">Harga: Rp<?= number_format($item['harga'], 0, ',', '.') ?></p>
                 
                 <!-- Add-ons section -->
                 <div class="mb-4">
-                    <h4 class="font-bold mb-2">Add-ons:</h4>
+                    <h4 class="font-bold mb-2">Tambahan:</h4>
                     <?php if (isset($menu_addons[$item['id']]) && count($menu_addons[$item['id']]) > 0): ?>
                         <ul class="list-disc pl-5 mb-2">
                             <?php foreach ($menu_addons[$item['id']] as $addon): ?>
@@ -207,18 +207,18 @@ foreach ($menu_items as $item) {
                             <?php endforeach; ?>
                         </ul>
                     <?php else: ?>
-                        <p class="text-gray-500 italic mb-2">No add-ons available</p>
+                        <p class="text-gray-500 italic mb-2">Tidak ada tambahan</p>
                     <?php endif; ?>
                 </div>
                 
                 <div class="flex space-x-2">
                     <button onclick="showEditModal(<?= htmlspecialchars(json_encode($item)) ?>)"
                             class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex-1">
-                        Edit
+                        Ubah
                     </button>
                     <button onclick="deleteItem(<?= $item['id'] ?>)"
                             class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 flex-1">
-                        Delete
+                        Hapus
                     </button>
                 </div>
             </div>
@@ -230,60 +230,60 @@ foreach ($menu_items as $item) {
 <!-- Add Modal -->
 <div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 hidden">
     <div class="bg-white rounded-lg max-w-lg mx-auto mt-20 p-6 overflow-y-auto max-h-screen">
-        <h2 class="text-2xl font-bold mb-4">Add New Menu Item</h2>
+        <h2 class="text-2xl font-bold mb-4">Tambahkan Menu Baru</h2>
         <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="action" value="add">
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Name</label>
+                <label class="block text-gray-700 font-bold mb-2">Nama</label>
                 <input type="text" name="nama" required
                        class="w-full px-3 py-2 border rounded">
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Description</label>
+                <label class="block text-gray-700 font-bold mb-2">Deskripsi</label>
                 <textarea name="deskripsi" required
                           class="w-full px-3 py-2 border rounded"></textarea>
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Image</label>
+                <label class="block text-gray-700 font-bold mb-2">Gambar</label>
                 <input type="file" name="gambar" required accept="image/*"
                        class="w-full px-3 py-2 border rounded">
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Stock</label>
+                <label class="block text-gray-700 font-bold mb-2">Stok</label>
                 <input type="number" name="stok" required min="0"
                        class="w-full px-3 py-2 border rounded">
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Price</label>
+                <label class="block text-gray-700 font-bold mb-2">Harga</label>
                 <input type="number" name="harga" required min="0" step="0.01"
                        class="w-full px-3 py-2 border rounded">
             </div>
             
             <!-- Add-ons section -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Add-ons</label>
+                <label class="block text-gray-700 font-bold mb-2">Tambahan</label>
                 <div id="addons-container">
                     <!-- Add-on items will be added here -->
                 </div>
                 <button type="button" onclick="addNewAddon('addons-container')"
                         class="mt-2 bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 text-sm">
-                    + Add New Add-on
+                    + Tambah Tambahan
                 </button>
             </div>
             
             <div class="flex justify-end space-x-2">
                 <button type="button" onclick="hideAddModal()"
                         class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-                    Cancel
+                    Batal
                 </button>
                 <button type="submit"
                         class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                    Add Item
+                    Tambah Item
                 </button>
             </div>
         </form>
@@ -299,39 +299,39 @@ foreach ($menu_items as $item) {
             <input type="hidden" name="id" id="edit_id">
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Name</label>
+                <label class="block text-gray-700 font-bold mb-2">Nama</label>
                 <input type="text" name="nama" id="edit_nama" required
                        class="w-full px-3 py-2 border rounded">
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Description</label>
+                <label class="block text-gray-700 font-bold mb-2">Deskripsi</label>
                 <textarea name="deskripsi" id="edit_deskripsi" required
                           class="w-full px-3 py-2 border rounded"></textarea>
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Image</label>
+                <label class="block text-gray-700 font-bold mb-2">Gambar</label>
                 <input type="file" name="gambar" accept="image/*"
                        class="w-full px-3 py-2 border rounded">
-                <small class="text-gray-500">Leave empty to keep current image</small>
+                <small class="text-gray-500">Biarkan kosong jika ingin menggunakan gambar sebelumnya</small>
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Stock</label>
+                <label class="block text-gray-700 font-bold mb-2">Stok</label>
                 <input type="number" name="stok" id="edit_stok" required min="0"
                        class="w-full px-3 py-2 border rounded">
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Price</label>
+                <label class="block text-gray-700 font-bold mb-2">Harga</label>
                 <input type="number" name="harga" id="edit_harga" required min="0" step="0.01"
                        class="w-full px-3 py-2 border rounded">
             </div>
             
             <!-- Existing Add-ons section -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Existing Add-ons</label>
+                <label class="block text-gray-700 font-bold mb-2">Tambahan Sebelumnya</label>
                 <div id="existing-addons-container">
                     <!-- Existing add-ons will be loaded here -->
                 </div>
@@ -339,20 +339,20 @@ foreach ($menu_items as $item) {
             
             <!-- New Add-ons section -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-bold mb-2">Add New Add-ons</label>
+                <label class="block text-gray-700 font-bold mb-2">Tambahkan Tabahan Baru</label>
                 <div id="edit-addons-container">
                     <!-- New add-on items will be added here -->
                 </div>
                 <button type="button" onclick="addNewAddon('edit-addons-container')"
                         class="mt-2 bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 text-sm">
-                    + Add New Add-on
+                    + Tambah Tambahan
                 </button>
             </div>
             
             <div class="flex justify-end space-x-2">
                 <button type="button" onclick="hideEditModal()"
                         class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-                    Cancel
+                    Batal
                 </button>
                 <button type="submit"
                         class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">

@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || !isAdmin()) {
 }
 
 // Build query with search conditions
-$query = "SELECT p.*, a.email as customer_email,
+$query = "SELECT p.*, a.email as customer_email, a.no_telp as customer_phone,
           GROUP_CONCAT(CONCAT(m.nama, ' (', pd.jumlah, ' pcs)') SEPARATOR ', ') as menu_items
           FROM pesanan p 
           JOIN akun a ON p.id_customer = a.id 
@@ -77,6 +77,7 @@ fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 fputcsv($output, [
     'Order ID',
     'Customer Email',
+    'Customer Phone',
     'Customer Name',
     'Delivery Address',
     'Items',
@@ -87,11 +88,11 @@ fputcsv($output, [
 
 // Add data
 $total_revenue = 0;
-// Add data
 foreach ($orders as $order) {
     fputcsv($output, [
         '#' . $order['id'],
         $order['customer_email'],
+        $order['customer_phone'],
         $order['nama_pemesan'],
         $order['alamat_pemesan'],
         $order['menu_items'],
@@ -106,8 +107,10 @@ foreach ($orders as $order) {
 fputcsv($output, [
     '',
     '',
+    '',
     'Total Revenue:',
     number_format($total_revenue, 0, ',', '.'),
+    '',
     '',
     ''
 ]);

@@ -112,20 +112,32 @@ foreach ($cart_items as $item) {
                             </td>
                             <td class="py-4 px-4 text-center">Rp <?= number_format($item['harga'], 0, ',', '.') ?></td>
                             <td class="py-4 px-4 text-center">
-                                <div class="flex items-center justify-center">
-                                    <input type="number" 
-                                           value="<?= $item['jumlah'] ?>" 
-                                           min="1" 
-                                           max="<?= $item['stok'] ?>" 
-                                           class="w-16 px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                           onchange="updateQuantity(<?= $item['id'] ?>, this.value)">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="flex items-center justify-center">
+                                        <input type="number" 
+                                               value="<?= $item['jumlah'] ?>" 
+                                               min="1" 
+                                               max="<?= $item['stok'] ?>" 
+                                               class="w-16 px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 <?= $item['stok'] < 5 ? 'border-yellow-500' : '' ?>"
+                                               onchange="updateQuantity(<?= $item['id'] ?>, this.value)"
+                                               <?= $item['stok'] <= 0 ? 'disabled' : '' ?>>
+                                    </div>
+                                    <?php if ($item['stok'] <= 0): ?>
+                                        <div class="text-red-600 text-xs mt-1">Stok habis</div>
+                                    <?php elseif ($item['stok'] < 5): ?>
+                                        <div class="text-yellow-600 text-xs mt-1">Sisa <?= $item['stok'] ?> tersedia</div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($item['jumlah'] > $item['stok']): ?>
+                                        <div class="text-red-600 text-xs mt-1">Melebihi stok tersedia!</div>
+                                    <?php endif; ?>
                                 </div>
                             </td>
-                            <td class="py-4 px-4">
+                            <td class="py-4 px-4 text-center">
                                 <?php if (!empty($menu_addons[$item['menu_id']])): ?>
-                                <div class="flex flex-col items-start">
+                                <div>
                                     <?php foreach ($menu_addons[$item['menu_id']] as $addon): ?>
-                                    <div class="flex items-center mb-1">
+                                    <div class="flex items-center mb-1 justify-center">
                                         <input type="checkbox" 
                                                id="addon_<?= $item['id'] ?>_<?= $addon['id'] ?>" 
                                                name="addons[<?= $item['id'] ?>][]" 
@@ -139,7 +151,7 @@ foreach ($cart_items as $item) {
                                     <?php endforeach; ?>
                                 </div>
                                 <?php else: ?>
-                                <span class="text-gray-500 text-sm">Tidak ada tambahan tersedia</span>
+                                <span class="text-gray-500">-</span>
                                 <?php endif; ?>
                             </td>
                             <td class="py-4 px-4 text-center subtotal" data-item-id="<?= $item['id'] ?>">
@@ -171,173 +183,185 @@ foreach ($cart_items as $item) {
                     </tbody>
                 </table>
             </div>
-            
-            <!-- Mobile view cards (visible only on mobile) -->
-            <div class="md:hidden space-y-4">
-                <?php foreach ($cart_items as $item): ?>
-                <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-orange-500" data-cart-id="<?= $item['id'] ?>">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center">
-                            <img src="../assets/images/menu/<?= htmlspecialchars($item['gambar']) ?>" 
-                                 alt="<?= htmlspecialchars($item['nama']) ?>" 
-                                 class="w-16 h-16 object-cover rounded-md mr-3">
-                            <div>
-                                <h3 class="font-medium"><?= htmlspecialchars($item['nama']) ?></h3>
-                                <p class="text-gray-600">Rp <?= number_format($item['harga'], 0, ',', '.') ?></p>
+                
+                <!-- Mobile view cards (visible only on mobile) -->
+                <div class="md:hidden space-y-4">
+                    <?php foreach ($cart_items as $item): ?>
+                    <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-orange-500" data-cart-id="<?= $item['id'] ?>">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <img src="../assets/images/menu/<?= htmlspecialchars($item['gambar']) ?>" 
+                                     alt="<?= htmlspecialchars($item['nama']) ?>" 
+                                     class="w-16 h-16 object-cover rounded-md mr-3">
+                                <div>
+                                    <h3 class="font-medium"><?= htmlspecialchars($item['nama']) ?></h3>
+                                    <p class="text-gray-600">Rp <?= number_format($item['harga'], 0, ',', '.') ?></p>
+                                </div>
+                            </div>
+                            <button type="button"
+                                    onclick="removeItem(<?= $item['id'] ?>)"
+                                    class="text-red-600 hover:text-red-800 p-2"
+                                    title="Delete">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Add-ons section for mobile -->
+                        <?php if (!empty($menu_addons[$item['menu_id']])): ?>
+                        <div class="mb-3">
+                            <h4 class="font-medium text-sm mb-1">Tambahan:</h4>
+                            <div class="pl-2">
+                                <?php foreach ($menu_addons[$item['menu_id']] as $addon): ?>
+                                <div class="flex items-center mb-1">
+                                    <input type="checkbox" 
+                                           id="mobile_addon_<?= $item['id'] ?>_<?= $addon['id'] ?>" 
+                                           name="addons[<?= $item['id'] ?>][]" 
+                                           value="<?= $addon['id'] ?>"
+                                           <?= in_array($addon['id'], $selected_addons[$item['id']] ?? []) ? 'checked' : '' ?>
+                                           onchange="updateAddon(<?= $item['id'] ?>, <?= $addon['id'] ?>, this.checked)">
+                                    <label for="mobile_addon_<?= $item['id'] ?>_<?= $addon['id'] ?>" class="ml-2 text-sm">
+                                        <?= htmlspecialchars($addon['nama']) ?> (+Rp <?= number_format($addon['harga'], 0, ',', '.') ?>)
+                                    </label>
+                                </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
-                        <button type="button"
-                                onclick="removeItem(<?= $item['id'] ?>)"
-                                class="text-red-600 hover:text-red-800 p-2"
-                                title="Delete">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                    
-                    <!-- Add-ons section for mobile -->
-                    <?php if (!empty($menu_addons[$item['menu_id']])): ?>
-                    <div class="mb-3">
-                        <h4 class="font-medium text-sm mb-1">Tambahan:</h4>
-                        <div class="pl-2">
-                            <?php foreach ($menu_addons[$item['menu_id']] as $addon): ?>
-                            <div class="flex items-center mb-1">
-                                <input type="checkbox" 
-                                       id="mobile_addon_<?= $item['id'] ?>_<?= $addon['id'] ?>" 
-                                       name="addons[<?= $item['id'] ?>][]" 
-                                       value="<?= $addon['id'] ?>"
-                                       <?= in_array($addon['id'], $selected_addons[$item['id']] ?? []) ? 'checked' : '' ?>
-                                       onchange="updateAddon(<?= $item['id'] ?>, <?= $addon['id'] ?>, this.checked)">
-                                <label for="mobile_addon_<?= $item['id'] ?>_<?= $addon['id'] ?>" class="ml-2 text-sm">
-                                    <?= htmlspecialchars($addon['nama']) ?> (+Rp <?= number_format($addon['harga'], 0, ',', '.') ?>)
-                                </label>
+                        <?php endif; ?>
+                        
+                        <div class="flex justify-between items-center">
+                            <div class="flex flex-col">
+                                <div class="flex items-center">
+                                    <label class="mr-2 text-sm text-gray-600">Jumlah:</label>
+                                    <input type="number" 
+                                           value="<?= $item['jumlah'] ?>" 
+                                           min="1" 
+                                           max="<?= $item['stok'] ?>" 
+                                           class="w-16 px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 <?= $item['stok'] < 5 ? 'border-yellow-500' : '' ?>"
+                                           onchange="updateQuantity(<?= $item['id'] ?>, this.value)"
+                                           <?= $item['stok'] <= 0 ? 'disabled' : '' ?>>
+                                </div>
+                                <?php if ($item['stok'] <= 0): ?>
+                                    <div class="text-red-600 text-xs mt-1">Stok habis</div>
+                                <?php elseif ($item['stok'] < 5): ?>
+                                    <div class="text-yellow-600 text-xs mt-1">Sisa <?= $item['stok'] ?> tersedia</div>
+                                <?php endif; ?>
+                                
+                                <?php if ($item['jumlah'] > $item['stok']): ?>
+                                    <div class="text-red-600 text-xs mt-1">Melebihi stok tersedia!</div>
+                                <?php endif; ?>
                             </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                    
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <label class="mr-2 text-sm text-gray-600">Jumlah:</label>
-                            <input type="number" 
-                                   value="<?= $item['jumlah'] ?>" 
-                                   min="1" 
-                                   max="<?= $item['stok'] ?>" 
-                                   class="w-16 px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                   onchange="updateQuantity(<?= $item['id'] ?>, this.value)">
-                        </div>
-                        <div class="subtotal font-medium" data-item-id="<?= $item['id'] ?>">
-                            <?php
-                            $item_subtotal = $item['harga'] * $item['jumlah'];
-                            if (isset($selected_addons[$item['id']]) && !empty($selected_addons[$item['id']])) {
-                                foreach ($selected_addons[$item['id']] as $addon_id) {
-                                    foreach ($menu_addons[$item['menu_id']] as $addon) {
-                                        if ($addon['id'] == $addon_id) {
-                                            $item_subtotal += $addon['harga'] * $item['jumlah'];
-                                            break;
+                            <div class="subtotal font-medium" data-item-id="<?= $item['id'] ?>">
+                                <?php
+                                $item_subtotal = $item['harga'] * $item['jumlah'];
+                                if (isset($selected_addons[$item['id']]) && !empty($selected_addons[$item['id']])) {
+                                    foreach ($selected_addons[$item['id']] as $addon_id) {
+                                        foreach ($menu_addons[$item['menu_id']] as $addon) {
+                                            if ($addon['id'] == $addon_id) {
+                                                $item_subtotal += $addon['harga'] * $item['jumlah'];
+                                                break;
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            ?>
-                            Rp <?= number_format($item_subtotal, 0, ',', '.') ?>
+                                ?>
+                                Rp <?= number_format($item_subtotal, 0, ',', '.') ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <br>
+                
+                <div class="mb-4">
+                    <a href="../customer/menu.php" class="text-orange-600 hover:underline inline-flex items-center">
+                        <i class="fas fa-arrow-left mr-2"></i> Kembali ke Menu
+                    </a>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6 mb-4">
+                    <h3 class="text-lg font-semibold mb-4">Informasi Pengiriman</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="nama_pemesan" class="block text-sm font-medium text-gray-700 mb-1">Nama Pemesan</label>
+                            <input type="text" 
+                                   id="nama_pemesan" 
+                                   name="nama_pemesan"
+                                   class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                   placeholder="Masukan Nama Pemesan"
+                                   required>
+                        </div>
+                        <div>
+                            <label for="alamat_pemesan" class="block text-sm font-medium text-gray-700 mb-1">Alamat Pengiriman</label>
+                            <textarea id="alamat_pemesan" 
+                                      name="alamat_pemesan"
+                                      rows="3" 
+                                      class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                      placeholder="Masukan Alamat Pengiriman"
+                                      required></textarea>
+                        </div>
+                        
+                        <!-- Add notes field -->
+                        <div>
+                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
+                            <textarea id="notes" 
+                                      name="notes"
+                                      rows="2" 
+                                      class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                      placeholder="Contoh : Jangan Pedas, Banyakin bumbu, Rumah Warna Biru"></textarea>
+                        </div>
+                        
+                        <!-- Location picker -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Lokasi Pengiriman</label>
+                            <div id="map" class="w-full h-64 rounded-md border mb-2"></div>
+                            <p class="text-sm text-gray-500 mb-2">Geser pin untuk menentukan lokasi yang tepat</p>
+                            <!-- In the checkout form in cart.php, make sure these fields are included -->
+                            <input type="hidden" name="latitude" id="latitude" value="">
+                            <input type="hidden" name="longitude" id="longitude" value="">
+                            
+                            <!-- Add this JavaScript to capture coordinates -->
+                            <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Try to get user's location
+                                if (navigator.geolocation) {
+                                    navigator.geolocation.getCurrentPosition(function(position) {
+                                        document.getElementById('latitude').value = position.coords.latitude;
+                                        document.getElementById('longitude').value = position.coords.longitude;
+                                    }, function(error) {
+                                        console.error("Error getting location: ", error);
+                                    });
+                                }
+                            });
+                            </script>
                         </div>
                     </div>
                 </div>
-                <?php endforeach; ?>
-            </div>
-            <br>
-            
-            <div class="mb-4">
-                <a href="../customer/menu.php" class="text-orange-600 hover:underline inline-flex items-center">
-                    <i class="fas fa-arrow-left mr-2"></i> Kembali ke Menu
-                </a>
-            </div>
-        </div>
 
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-lg shadow-md p-6 mb-4">
-                <h3 class="text-lg font-semibold mb-4">Informasi Pengiriman</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label for="nama_pemesan" class="block text-sm font-medium text-gray-700 mb-1">Nama Pemesan</label>
-                        <input type="text" 
-                               id="nama_pemesan" 
-                               name="nama_pemesan"
-                               class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                               placeholder="Masukan Nama Pemesan"
-                               required>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-lg font-semibold">Total:</span>
+                        <span class="text-xl font-bold text-orange-600 total-price">
+                            Rp <?= number_format($total, 0, ',', '.') ?>
+                        </span>
                     </div>
-                    <div>
-                        <label for="alamat_pemesan" class="block text-sm font-medium text-gray-700 mb-1">Alamat Pengiriman</label>
-                        <textarea id="alamat_pemesan" 
-                                  name="alamat_pemesan"
-                                  rows="3" 
-                                  class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                  placeholder="Masukan Alamat Pengiriman"
-                                  required></textarea>
-                    </div>
-                    
-                    <!-- Add notes field -->
-                    <div>
-                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
-                        <textarea id="notes" 
-                                  name="notes"
-                                  rows="2" 
-                                  class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                  placeholder="Contoh : Jangan Pedas, Banyakin bumbu, Rumah Warna Biru"></textarea>
-                    </div>
-                    
-                    <!-- Location picker -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Lokasi Pengiriman</label>
-                        <div id="map" class="w-full h-64 rounded-md border mb-2"></div>
-                        <p class="text-sm text-gray-500 mb-2">Geser pin untuk menentukan lokasi yang tepat</p>
-                        <!-- In the checkout form in cart.php, make sure these fields are included -->
-                        <input type="hidden" name="latitude" id="latitude" value="">
-                        <input type="hidden" name="longitude" id="longitude" value="">
-                        
-                        <!-- Add this JavaScript to capture coordinates -->
-                        <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            // Try to get user's location
-                            if (navigator.geolocation) {
-                                navigator.geolocation.getCurrentPosition(function(position) {
-                                    document.getElementById('latitude').value = position.coords.latitude;
-                                    document.getElementById('longitude').value = position.coords.longitude;
-                                }, function(error) {
-                                    console.error("Error getting location: ", error);
-                                });
-                            }
-                        });
-                        </script>
-                    </div>
+                    <input type="hidden" name="preview_order" value="1">
+                    <button type="submit"
+                            class="w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition">
+                        Lihat Pesanan
+                    </button>
                 </div>
             </div>
-
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-lg font-semibold">Total:</span>
-                    <span class="text-xl font-bold text-orange-600 total-price">
-                        Rp <?= number_format($total, 0, ',', '.') ?>
-                    </span>
-                </div>
-                <input type="hidden" name="preview_order" value="1">
-                <button type="submit"
-                        class="w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition">
-                    Lihat Pesanan
-                </button>
-            </div>
+        </form>
+        <?php else: ?>
+        <div class="bg-white rounded-lg shadow-md p-8 text-center">
+            <p class="text-gray-500 mb-4">Keranjang Kamu Kosong</p>
+            <a href="../customer/menu.php" class="text-orange-600 hover:underline inline-flex items-center justify-center">
+                <i class="fas fa-arrow-left mr-2"></i> Kembali ke Menu
+            </a>
         </div>
-    </form>
-    <?php else: ?>
-    <div class="bg-white rounded-lg shadow-md p-8 text-center">
-        <p class="text-gray-500 mb-4">Keranjang Kamu Kosong</p>
-        <a href="../customer/menu.php" class="text-orange-600 hover:underline inline-flex items-center justify-center">
-            <i class="fas fa-arrow-left mr-2"></i> Kembali ke Menu
-        </a>
-    </div>
-    <?php endif; ?>
+        <?php endif; ?>
 </div>
 
 <!-- Leaflet CSS and JS (Open Source Maps) -->
@@ -392,6 +416,24 @@ function removeItem(cartId) {
 }
 
 function updateQuantity(cartId, quantity) {
+    // Get the max stock from the input element
+    const inputElement = document.querySelector(`input[onchange="updateQuantity(${cartId}, this.value)"]`);
+    const maxStock = parseInt(inputElement.getAttribute('max'));
+    
+    // Validate quantity against stock
+    if (quantity > maxStock) {
+        Swal.fire({
+            title: 'Stok Tidak Cukup',
+            text: `Hanya tersedia ${maxStock} item dalam stok`,
+            icon: 'warning',
+            confirmButtonColor: '#f97316'
+        });
+        
+        // Reset to max available stock
+        quantity = maxStock;
+        inputElement.value = maxStock;
+    }
+    
     fetch(`cart_actions.php?action=update&id=${cartId}&quantity=${quantity}`, {
         method: 'POST',
         headers: {
@@ -507,6 +549,30 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('longitude').value = lng;
         }, function(error) {
             console.log('Error getting location:', error.message);
+        });
+    }
+});
+</script>
+
+<!-- Add this before the closing </form> tag -->
+<script>
+document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+    // Check if any item exceeds available stock
+    let hasStockIssue = false;
+    
+    <?php foreach ($cart_items as $item): ?>
+    if (<?= $item['jumlah'] ?> > <?= $item['stok'] ?>) {
+        hasStockIssue = true;
+    }
+    <?php endforeach; ?>
+    
+    if (hasStockIssue) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Stok Tidak Cukup',
+            text: 'Beberapa item dalam keranjang melebihi stok yang tersedia. Silakan perbarui jumlah pesanan Anda.',
+            icon: 'error',
+            confirmButtonColor: '#f97316'
         });
     }
 });

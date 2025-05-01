@@ -403,7 +403,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                         <div class="ml-3">
                             <h3 class="text-sm font-medium text-blue-800">Pre-Order Information</h3>
                             <div class="mt-1 text-sm text-blue-700">
-                                <p>Pesanan akan dikumpulkan dari 27-28 April (Pre Order) dan akan dikirim pada 29 April </p>
+                                <p>Pesanan akan dikumpulkan dari 1-2 Mei (Pre Order) dan akan dikirim pada 3 Mei</p>
                             </div>
                         </div>
                     </div>

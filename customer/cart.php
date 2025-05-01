@@ -11,7 +11,7 @@ if (isAdmin()) {
     redirect('../admin/dashboard.php');
 }
 
-// Get cart items with menu details
+// Get cart items with menu details - update query to group by id
 $stmt = $pdo->prepare("
     SELECT k.id, k.jumlah, m.id as menu_id, m.nama, m.gambar, m.harga, m.stok 
     FROM keranjang k
@@ -368,53 +368,65 @@ foreach ($cart_items as $item) {
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<!-- Remove the Google Maps script and replace with Leaflet implementation -->
 <script>
-function removeItem(cartId) {
-    Swal.fire({
-        title: 'Remove Item',
-        text: "Are you sure you want to remove this item?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, remove it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`cart_actions.php?action=remove&id=${cartId}`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Remove item from DOM
-                    document.querySelectorAll(`[data-cart-id="${cartId}"]`).forEach(el => {
-                        el.remove();
-                    });
-                    
-                    // Update cart count and total
-                    updateCartCountAndTotal(data.count, data.total);
-                    
-                    // If cart is empty, reload page to show empty cart message
-                    if (data.count === 0) {
-                        location.reload();
-                    }
-                    
-                    Swal.fire('Removed!', data.message, 'success');
-                } else {
-                    Swal.fire('Error!', data.message, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
-            });
-        }
-    });
-}
+let map;
+let marker;
+const defaultLocation = [-6.9801685, 107.6331361]; // Default to Telkom University area
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize map if the map element exists
+    const mapElement = document.getElementById('map');
+    if (mapElement) {
+        // Create map
+        map = L.map('map').setView(defaultLocation, 15);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Create marker
+        marker = L.marker(defaultLocation, {
+            draggable: true
+        }).addTo(map);
+        
+        // Set initial values
+        document.getElementById('latitude').value = defaultLocation[0];
+        document.getElementById('longitude').value = defaultLocation[1];
+        
+        // Update coordinates when marker is dragged
+        marker.on('dragend', function() {
+            const position = marker.getLatLng();
+            document.getElementById('latitude').value = position.lat;
+            document.getElementById('longitude').value = position.lng;
+        });
+        
+        // Try to get user's current location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const pos = [
+                        position.coords.latitude,
+                        position.coords.longitude
+                    ];
+                    
+                    map.setView(pos, 15);
+                    marker.setLatLng(pos);
+                    
+                    document.getElementById('latitude').value = pos[0];
+                    document.getElementById('longitude').value = pos[1];
+                },
+                () => {
+                    // If geolocation fails, use default location
+                    console.log("Geolocation failed or was denied");
+                }
+            );
+        }
+    }
+});
+
+// Keep the existing functions for cart operations
 function updateQuantity(cartId, quantity) {
     // Get the max stock from the input element
     const inputElement = document.querySelector(`input[onchange="updateQuantity(${cartId}, this.value)"]`);
@@ -440,7 +452,12 @@ function updateQuantity(cartId, quantity) {
             'Accept': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             // Update subtotal display
@@ -451,7 +468,7 @@ function updateQuantity(cartId, quantity) {
             // Update cart count and total
             updateCartCountAndTotal(data.count, data.total);
         } else {
-            Swal.fire('Error!', data.message, 'error');
+            Swal.fire('Error!', data.message || 'Something went wrong', 'error');
             // Reset to previous quantity
             location.reload();
         }
@@ -459,6 +476,7 @@ function updateQuantity(cartId, quantity) {
     .catch(error => {
         console.error('Error:', error);
         Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
+        location.reload();
     });
 }
 
@@ -469,7 +487,12 @@ function updateAddon(cartId, addonId, checked) {
             'Accept': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             // Update subtotal display
@@ -480,7 +503,7 @@ function updateAddon(cartId, addonId, checked) {
             // Update cart count and total
             updateCartCountAndTotal(data.count, data.total);
         } else {
-            Swal.fire('Error!', data.message, 'error');
+            Swal.fire('Error!', data.message || 'Something went wrong', 'error');
             // Reset checkbox state
             location.reload();
         }
@@ -488,70 +511,80 @@ function updateAddon(cartId, addonId, checked) {
     .catch(error => {
         console.error('Error:', error);
         Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
+        location.reload();
     });
 }
 
-function updateCartCountAndTotal(count, total) {
-    // Update cart count in navbar
-    const cartCountElement = document.getElementById('cartCount');
-    if (cartCountElement) {
-        cartCountElement.textContent = count;
-    }
-    
-    // Update total price
-    const totalPriceElement = document.querySelector('.total-price');
-    if (totalPriceElement) {
-        totalPriceElement.textContent = 'Rp ' + formatNumber(total);
-    }
+function removeItem(cartId) {
+    Swal.fire({
+        title: 'Hapus Item?',
+        text: "Item ini akan dihapus dari keranjang",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#f97316',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`cart_actions.php?action=remove&id=${cartId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Remove the item from DOM
+                    document.querySelectorAll(`[data-cart-id="${cartId}"]`).forEach(el => {
+                        el.remove();
+                    });
+                    
+                    // Update cart count and total
+                    updateCartCountAndTotal(data.count, data.total);
+                    
+                    // Show success message
+                    Swal.fire('Dihapus!', 'Item telah dihapus dari keranjang.', 'success');
+                    
+                    // Reload if cart is empty
+                    if (data.count === 0) {
+                        location.reload();
+                    }
+                } else {
+                    Swal.fire('Error!', data.message || 'Something went wrong', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
+            });
+        }
+    });
 }
 
 function formatNumber(number) {
     return new Intl.NumberFormat('id-ID').format(number);
 }
 
-// Initialize map
-document.addEventListener('DOMContentLoaded', function() {
-    // Default to a central location in Indonesia if no coordinates are provided
-    const map = L.map('map').setView([-6.2088, 106.8456], 13);
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-    
-    // Add a draggable marker
-    const marker = L.marker([-6.2088, 106.8456], {
-        draggable: true
-    }).addTo(map);
-    
-    // Update hidden inputs when marker is moved
-    marker.on('dragend', function(event) {
-        const position = marker.getLatLng();
-        document.getElementById('latitude').value = position.lat;
-        document.getElementById('longitude').value = position.lng;
-    });
-    
-    // Set initial values
-    document.getElementById('latitude').value = -6.2088;
-    document.getElementById('longitude').value = 106.8456;
-    
-    // Try to get user's location
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            
-            // Update map and marker
-            map.setView([lat, lng], 15);
-            marker.setLatLng([lat, lng]);
-            
-            // Update hidden inputs
-            document.getElementById('latitude').value = lat;
-            document.getElementById('longitude').value = lng;
-        }, function(error) {
-            console.log('Error getting location:', error.message);
-        });
+function updateCartCountAndTotal(count, total) {
+    // Update cart count in header
+    const cartCountElement = document.getElementById('cartCount');
+    if (cartCountElement) {
+        cartCountElement.textContent = count;
     }
-});
+    
+    // Update total in cart
+    const totalElement = document.getElementById('cartTotal');
+    if (totalElement) {
+        totalElement.textContent = 'Rp ' + formatNumber(total);
+    }
+}
 </script>
 
 <!-- Add this before the closing </form> tag -->

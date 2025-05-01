@@ -259,3 +259,71 @@ CREATE TABLE `pesanan_detail_add_ons` (
   KEY `id_pesanan_detail` (`id_pesanan_detail`),
   CONSTRAINT `pesanan_detail_add_ons_ibfk_1` FOREIGN KEY (`id_pesanan_detail`) REFERENCES `pesanan_detail` (`id`) ON DELETE CASCADE
 );
+
+
+-- Add a 'jumlah' column to the keranjang_add_ons table if it doesn't exist
+ALTER TABLE `keranjang_add_ons` ADD COLUMN `jumlah` INT NOT NULL DEFAULT 1;
+
+-- Add a 'jumlah' column to the pesanan_detail_add_ons table if it doesn't exist
+ALTER TABLE `pesanan_detail_add_ons` ADD COLUMN `jumlah` INT NOT NULL DEFAULT 1;
+
+-- Create a trigger to automatically copy add-ons from cart to order details when an order is placed
+DELIMITER //
+CREATE TRIGGER IF NOT EXISTS copy_addons_to_order AFTER INSERT ON pesanan_detail
+FOR EACH ROW
+BEGIN
+    DECLARE cart_id INT;
+    
+    -- Find the cart item that corresponds to this order detail
+    SELECT k.id INTO cart_id
+    FROM keranjang k
+    WHERE k.id_customer = (SELECT id_customer FROM pesanan WHERE id = NEW.id_pesanan)
+    AND k.id_menu = NEW.id_menu
+    LIMIT 1;
+    
+    -- If cart item found, copy its add-ons to the order
+    IF cart_id IS NOT NULL THEN
+        INSERT INTO pesanan_detail_add_ons (id_pesanan_detail, nama, harga, jumlah)
+        SELECT 
+            NEW.id,
+            ma.nama,
+            ma.harga,
+            ka.jumlah
+        FROM keranjang_add_ons ka
+        JOIN menu_add_ons ma ON ka.id_add_on = ma.id
+        WHERE ka.id_keranjang = cart_id;
+    END IF;
+END //
+DELIMITER ;
+
+-- Create a function to calculate the total price of an order including add-ons
+DELIMITER //
+CREATE FUNCTION IF NOT EXISTS calculate_order_total(order_id INT) RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE total DECIMAL(10,2);
+    
+    -- Calculate base price from order details
+    SELECT SUM(pd.jumlah * pd.harga_satuan) INTO total
+    FROM pesanan_detail pd
+    WHERE pd.id_pesanan = order_id;
+    
+    -- Add price of add-ons
+    SELECT total + IFNULL(SUM(pda.jumlah * pda.harga), 0) INTO total
+    FROM pesanan_detail_add_ons pda
+    JOIN pesanan_detail pd ON pda.id_pesanan_detail = pd.id
+    WHERE pd.id_pesanan = order_id;
+    
+    RETURN total;
+END //
+DELIMITER ;
+
+-- Create a procedure to update order totals
+DELIMITER //
+CREATE PROCEDURE IF NOT EXISTS update_order_total(IN order_id INT)
+BEGIN
+    UPDATE pesanan
+    SET total_harga = calculate_order_total(order_id)
+    WHERE id = order_id;
+END //
+DELIMITER ;

@@ -4,7 +4,15 @@ ob_start();
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-require_once '../includes/header.php';
+// Remove the header include which is causing HTML output before JSON
+// require_once '../includes/header.php';
+
+// Make sure no HTML is output before JSON response
+session_start();
+
+// Include database connection and functions
+require_once '../config/database.php';
+require_once '../includes/functions.php';
 
 // Ensure user is logged in
 if (!isLoggedIn()) {
@@ -24,8 +32,10 @@ if (isAdmin()) {
 $action = $_GET['action'] ?? '';
 $cart_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Verify cart item belongs to current user
-if ($cart_id > 0) {
+// Fix for the "Invalid cart item" error
+// Only verify cart item belongs to current user if we're not removing an item
+// For remove action, we'll check if the item exists in the delete query
+if ($cart_id > 0 && $action !== 'remove') {
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM keranjang WHERE id = ? AND id_customer = ?");
     $stmt->execute([$cart_id, $_SESSION['user_id']]);
     if ($stmt->fetchColumn() == 0) {
@@ -56,7 +66,7 @@ function getCartData($user_id, $pdo) {
         
         // Add add-ons price
         $stmt = $pdo->prepare("
-            SELECT ma.harga 
+            SELECT ma.harga, ka.jumlah as addon_quantity
             FROM keranjang_add_ons ka
             JOIN menu_add_ons ma ON ka.id_add_on = ma.id
             WHERE ka.id_keranjang = ?
@@ -65,7 +75,7 @@ function getCartData($user_id, $pdo) {
         $addons = $stmt->fetchAll();
         
         foreach ($addons as $addon) {
-            $item_total += $addon['harga'] * $item['jumlah'];
+            $item_total += $addon['harga'] * ($addon['addon_quantity'] ?? $item['jumlah']);
         }
         
         $total += $item_total;
@@ -81,26 +91,33 @@ function getCartData($user_id, $pdo) {
 try {
     // Clear any previous output
     ob_clean();
+    header('Content-Type: application/json');
     
     switch ($action) {
         case 'remove':
             // Remove cart item and its add-ons
             $pdo->beginTransaction();
             
-            // Delete add-ons first
+            // Delete add-ons first (if any exist)
             $stmt = $pdo->prepare("DELETE FROM keranjang_add_ons WHERE id_keranjang = ?");
             $stmt->execute([$cart_id]);
             
-            // Delete cart item
+            // Delete cart item and check if it belongs to the current user
             $stmt = $pdo->prepare("DELETE FROM keranjang WHERE id = ? AND id_customer = ?");
             $stmt->execute([$cart_id, $_SESSION['user_id']]);
+            
+            // Check if any rows were affected
+            if ($stmt->rowCount() == 0) {
+                $pdo->rollBack();
+                echo json_encode(['success' => false, 'message' => 'Item not found in your cart']);
+                exit;
+            }
             
             $pdo->commit();
             
             // Get updated cart count and total
             $cart_data = getCartData($_SESSION['user_id'], $pdo);
             
-            header('Content-Type: application/json');
             echo json_encode([
                 'success' => true, 
                 'message' => 'Item removed from cart',

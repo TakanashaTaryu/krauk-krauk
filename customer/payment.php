@@ -62,11 +62,11 @@ if (empty($cart_items)) {
     redirect('../customer/cart.php');
 }
 
-// Get add-ons for each cart item
+// Get add-ons for each cart item with quantities
 $cart_addons = [];
 foreach ($cart_items as $item) {
     $stmt = $pdo->prepare("
-        SELECT ma.* 
+        SELECT ma.*, ka.jumlah as addon_quantity 
         FROM keranjang_add_ons ka
         JOIN menu_add_ons ma ON ka.id_add_on = ma.id
         WHERE ka.id_keranjang = ?
@@ -83,9 +83,9 @@ foreach ($cart_items as $item) {
     $item_total = $item['harga'] * $item['jumlah'];
     $item_addons = $cart_addons[$item['id']] ?? [];
     
-    // Add add-ons price
+    // Add add-ons price based on their individual quantities
     foreach ($item_addons as $addon) {
-        $item_total += $addon['harga'] * $item['jumlah'];
+        $item_total += $addon['harga'] * $addon['addon_quantity'];
     }
     
     $subtotal += $item_total;
@@ -183,13 +183,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                 foreach ($cart_addons[$item['id']] as $addon) {
                     $stmt = $pdo->prepare("
                         INSERT INTO pesanan_detail_add_ons (
-                            id_pesanan_detail, nama, harga
-                        ) VALUES (?, ?, ?)
+                            id_pesanan_detail, nama, harga, jumlah
+                        ) VALUES (?, ?, ?, ?)
                     ");
                     $stmt->execute([
                         $order_detail_id,
                         $addon['nama'],
-                        $addon['harga']
+                        $addon['harga'],
+                        $addon['addon_quantity']
                     ]);
                 }
             }
@@ -341,8 +342,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['payment_proof']) && 
                                     <ul class="pl-4 text-sm">
                                         <?php foreach ($order_item['addons'] as $addon): ?>
                                         <li class="flex justify-between">
-                                            <span><?= htmlspecialchars($addon['nama']) ?></span>
-                                            <span>+Rp <?= number_format($addon['harga'], 0, ',', '.') ?></span>
+                                            <span>
+                                                <?= htmlspecialchars($addon['nama']) ?>
+                                                <?php if (isset($addon['addon_quantity']) && $addon['addon_quantity'] != $order_item['item']['jumlah']): ?>
+                                                (x<?= $addon['addon_quantity'] ?>)
+                                                <?php endif; ?>
+                                            </span>
+                                            <span>+Rp <?= number_format($addon['harga'] * ($addon['addon_quantity'] ?? 1), 0, ',', '.') ?></span>
                                         </li>
                                         <?php endforeach; ?>
                                     </ul>
@@ -687,3 +693,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+</div>

@@ -99,7 +99,7 @@ foreach ($cart_items as $item) {
 }
 
 // Add taxes
-$qris_tax = 500;
+$qris_tax = 0;
 $app_tax = 0;
 $tax_total = $qris_tax + $app_tax;
 $grand_total = $subtotal + $tax_total;

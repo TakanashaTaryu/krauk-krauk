@@ -1,0 +1,19 @@
+
+
+{
+  "name" : "kwu",
+  "version" : "0.1.0",
+  "description": "Website penjualan pre orer makanan",
+  "main": "index.php",
+
+  "scripts": {
+      "build": "tailwindcss build -i assets/css/input.css -o assets/css/styles.css",
+      "watch": "tailwindcss -i assets/css/input.css -o assets/css/styles.css --watch" 
+  },
+
+  "authors": "Takanasha Taryu",
+
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
